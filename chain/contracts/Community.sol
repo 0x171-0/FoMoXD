@@ -2,8 +2,9 @@
 pragma solidity ^0.8.17;
 
 import "./interface/ICommunity.sol";
+import "./event/CommunityEvent.sol";
 
-contract Community is ICommunity {
+contract Community is ICommunity, CommunityEvent {
     /* ------------------------------------------------------ */
     /*                      CONFIGURATION                     */
     /* ------------------------------------------------------ */
@@ -20,15 +21,6 @@ contract Community is ICommunity {
     mapping(uint256 => mapping(address => bool)) public approved;
     mapping(address => bool) public isOwner;
 
-    /* ------------------------------------------------------ */
-    /*                          EVENT                         */
-    /* ------------------------------------------------------ */
-
-    event Deposit(address indexed sender, uint256 amount);
-    event Submit(uint256 indexed txId);
-    event Approve(address indexed owner, uint256 indexed txId);
-    event Revoke(address indexed oener, uint256 indexed txId);
-    event Execute(uint256 indexed txId);
     /* ------------------------------------------------------ */
     /*                        MODIFIERS                       */
     /* ------------------------------------------------------ */

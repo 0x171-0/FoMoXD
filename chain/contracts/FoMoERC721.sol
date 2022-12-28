@@ -17,27 +17,25 @@ contract FoMoERC721 is
     UUPSUpgradeable
 {
     /* ------------------------------------------------------ */
-    /*                      CONFIGURABLES                     */
+    /*                CONFIGURABLES & DATASETS
     /* ------------------------------------------------------ */
     Counters.Counter private nextTokenId_;
+    address public FoMoXD_;
+    bool public mintActive;
+    bool public earlyMintActive;
+    // bool public revealed; // reveal mystery box or not
+    string public baseURI_;
+    string public mysteryTokenURI_; // mystery box image URL
+    bytes32 public merkleRoot; // whitelist root
     uint256 public price_; // price for each token
     uint256 public maxSupply_;
     uint256 public earlyMintMaxBalance;
     uint256 public ownerMaxBalance;
     uint256 public userMaxBalance;
     uint256 public maxMintPerTx;
-    bool public mintActive;
-    bool public earlyMintActive;
-    /* ------------------------------------------------------ */
-    /*                        DATASETS                        */
-    /* ------------------------------------------------------ */
-    // bool public revealed; // reveal mystery box or not
-    string public baseURI_;
-    string public mysteryTokenURI_; // mystery box image URL
     mapping(uint256 => bool) public roundIsReveal_;
     mapping(uint256 => string) private roundBaseURI_;
     mapping(uint256 => string) public roundMysteryTokenURI;
-    bytes32 public merkleRoot; // whitelist root
     mapping(address => uint256) public whiteListClaimed; // whitelist token amounts which already cliameded
     mapping(uint256 => string) private _tokenURIs; // TODO:
     mapping(address => uint256) public balance;
@@ -47,10 +45,6 @@ contract FoMoERC721 is
     using MerkleProof for bytes32[];
     using StringsUpgradeable for uint256;
     using Counters for Counters.Counter;
-    /* ------------------------------------------------------ */
-    /*                        CONTRACTS                       */
-    /* ------------------------------------------------------ */
-    address public FoMoXD_;
     /* ------------------------------------------------------ */
     /*                        MODIFIERS                       */
     /* ------------------------------------------------------ */

@@ -144,9 +144,14 @@ flowchart LR
 
 # Todo
 
-[ ] Decentralize Governance system
+## Chain
 
+[ ] Decentralize Governance system
 [ ] Profit-sharing Token
+
+## Client
+
+[ ] Profit-sharing Token Page
 
 # Credits
 - [Style Guide](https://docs.soliditylang.org/en/v0.8.17/common-patterns.html)

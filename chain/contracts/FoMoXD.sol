@@ -13,7 +13,7 @@ import "./library/FXDPuffsCalc.sol";
 import "./library/FXDdatasets.sol";
 import "./library/NameFilter.sol";
 
-import "./FXDevents.sol";
+import "./event/FXDevents.sol";
 
 // import "hardhat/console.sol";
 

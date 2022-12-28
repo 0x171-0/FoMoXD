@@ -5,28 +5,18 @@ import "./interface/ICommunity.sol";
 import "./interface/IPlayerBookReceiver.sol";
 
 import "./library/NameFilter.sol";
+import "./event/PlayerBookEvent.sol";
 
 // import "hardhat/console.sol";
 
-contract PlayerBook {
-    /* ------------------------------------------------------ */
-    /*                         LIBRARY                        */
-    /* ------------------------------------------------------ */
+contract PlayerBook is PlayerBookEvent {
     using NameFilter for string;
-    /* ------------------------------------------------------ */
-    /*                        CONTRACT
-    /* ------------------------------------------------------ */
     ICommunity public Community_;
-    /* ------------------------------------------------------ */
-    /*                      CONFIGURATION                     */
-    /* ------------------------------------------------------ */
     uint256 public registrationFee_ = 1 gwei;
-
     uint256 public pID_; // total number of players
     uint256 public gID_; // total number of games
 
     // price to register a name
-
     struct Player {
         address addr;
         bytes32 name;
@@ -43,20 +33,6 @@ contract PlayerBook {
     mapping(uint256 => mapping(uint256 => bytes32)) public plyrNameList_; // (pID => nameNum => name) list of names a player owns
     mapping(uint256 => IPlayerBookReceiver) public games_; // mapping of our game interfaces for sending your account info to games
 
-    /* ------------------------------------------------------ */
-    /*                         EVENTS                         */
-    /* ------------------------------------------------------ */
-    event onNewName(
-        uint256 indexed playerID,
-        address indexed playerAddress,
-        bytes32 indexed playerName,
-        bool isNewPlayer,
-        uint256 affiliateID,
-        address affiliateAddress,
-        bytes32 affiliateName,
-        uint256 amountPaid,
-        uint256 timeStamp
-    );
     /* ------------------------------------------------------ */
     /*                        MODIFIER                        */
     /* ------------------------------------------------------ */
