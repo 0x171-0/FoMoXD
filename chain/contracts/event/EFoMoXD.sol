@@ -2,7 +2,7 @@
 pragma solidity ^0.8.17;
 import "../library/FXDdatasets.sol";
 
-contract FXDevents {
+contract EFoMoXD {
     /* ------------------------------------------------------ */
     /*                         Events                         */
     /* ------------------------------------------------------ */

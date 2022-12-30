@@ -2,9 +2,9 @@
 pragma solidity ^0.8.17;
 
 import "./interface/ICommunity.sol";
-import "./event/CommunityEvent.sol";
+import "./event/ECommunity.sol";
 
-contract Community is ICommunity, CommunityEvent {
+contract Community is ICommunity, ECommunity {
     /* ------------------------------------------------------ */
     /*                      CONFIGURATION                     */
     /* ------------------------------------------------------ */

@@ -13,8 +13,8 @@ describe("FoMoXD", function () {
     const [owner, player1, player2, player3, dev1, dev2, otherAccount] =
       await ethers.getSigners();
 
-    const FoMoERC20 = await ethers.getContractFactory("FoMoERC20");
-    const foMoERC20 = await FoMoERC20.deploy(10 ** 6, "FoMoERC20", "FXD");
+    const PXD = await ethers.getContractFactory("PXD");
+    const pxd = await PXD.deploy(10 ** 6, "PowHXD", "FXD");
 
     const FOMOERC721_MYSTERY_BOX_IMAGE_URI =
       "https://ipfs.io/ipfs/egqoirncqioryqeogejxuxthoqh4q/";
@@ -27,7 +27,7 @@ describe("FoMoXD", function () {
     ]);
 
     const Divies = await ethers.getContractFactory("Divies");
-    const divies = await Divies.deploy();
+    const divies = await Divies.deploy(pxd.address);
 
     const Community = await ethers.getContractFactory("Community");
     const community = await Community.deploy(
@@ -49,7 +49,7 @@ describe("FoMoXD", function () {
     const foMoXD = await FoMoXD.deploy(
       playerBook.address,
       community.address,
-      foMoERC20.address,
+      pxd.address,
       foMoERC721.address,
       divies.address,
       mockedNumOracle.address
@@ -66,7 +66,7 @@ describe("FoMoXD", function () {
     const otherFoMo = await FoMoXD.deploy(
       playerBook.address,
       community.address,
-      foMoERC20.address,
+      pxd.address,
       foMoERC721.address,
       divies.address,
       mockedNumOracle.address

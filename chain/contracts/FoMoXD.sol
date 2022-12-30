@@ -13,11 +13,11 @@ import "./library/FXDPuffsCalc.sol";
 import "./library/FXDdatasets.sol";
 import "./library/NameFilter.sol";
 
-import "./event/FXDevents.sol";
+import "./event/EFoMoXD.sol";
 
 // import "hardhat/console.sol";
 
-contract FoMoXD is FXDevents {
+contract FoMoXD is EFoMoXD {
     /* ------------------------------------------------------ */
     /*                         LIBRARY                        */
     /* ------------------------------------------------------ */

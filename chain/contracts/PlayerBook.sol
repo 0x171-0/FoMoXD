@@ -5,11 +5,11 @@ import "./interface/ICommunity.sol";
 import "./interface/IPlayerBookReceiver.sol";
 
 import "./library/NameFilter.sol";
-import "./event/PlayerBookEvent.sol";
+import "./event/EPlayerBook.sol";
 
 // import "hardhat/console.sol";
 
-contract PlayerBook is PlayerBookEvent {
+contract PlayerBook is EPlayerBook {
     using NameFilter for string;
     ICommunity public Community_;
     uint256 public registrationFee_ = 1 gwei;

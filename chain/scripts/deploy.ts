@@ -5,9 +5,9 @@ async function main() {
   console.log("Deploying contracts with the account:", deployer.address);
   console.log("Account balance:", (await deployer.getBalance()).toString());
   /* ------------------------ ERC20 ----------------------- */
-  const FoMoERC20 = await ethers.getContractFactory("FoMoERC20");
-  const foMoERC20 = await FoMoERC20.deploy(10 ** 6, "FoMoERC20", "FXD");
-  console.log(`[FoMoERC20] Deployed to ${foMoERC20.address}`);
+  const PXD = await ethers.getContractFactory("PXD");
+  const pxd = await PXD.deploy(10 ** 6, "PowHXD", "FXD");
+  console.log(`[PXD] Deployed to ${pxd.address}`);
   /* ----------------------- ERC721 ----------------------- */
   const FoMoERC721 = await ethers.getContractFactory("FoMoERC721");
   const foMoERC721 = await upgrades.deployProxy(FoMoERC721, [
@@ -43,7 +43,7 @@ async function main() {
   console.log(`[PlayerBook] Deployed to ${playerBook.address}`);
   /* ----------------------- Divies ----------------------- */
   const Divies = await ethers.getContractFactory("Divies");
-  const divies = await Divies.deploy();
+  const divies = await Divies.deploy(pxd.address);
   console.log(`[Divies] Deployed to ${divies.address}`);
   console.log(`[Community] Deployed to ${community.address}`);
   /* ----------------------- Oracle ----------------------- */
@@ -54,7 +54,7 @@ async function main() {
   const foMoXD = await FoMoXD.deploy(
     playerBook.address,
     community.address,
-    foMoERC20.address,
+    pxd.address,
     foMoERC721.address,
     divies.address,
     numOracle.address
@@ -64,7 +64,7 @@ async function main() {
   const otherFoMo = await FoMoXD.deploy(
     playerBook.address,
     community.address,
-    foMoERC20.address,
+    pxd.address,
     foMoERC721.address,
     divies.address,
     numOracle.address

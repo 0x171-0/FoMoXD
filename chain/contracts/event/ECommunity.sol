@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-contract CommunityEvent {
+contract ECommunity {
     event Deposit(address indexed sender, uint256 amount);
     event Submit(uint256 indexed txId);
     event Approve(address indexed owner, uint256 indexed txId);
