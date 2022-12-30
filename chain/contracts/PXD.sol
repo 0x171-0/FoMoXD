@@ -102,6 +102,10 @@ contract PXD is ERC20, EPXD, Math {
         }
     }
 
+    /* ------------------------------------------------------ */
+    /*                       constructor                      */
+    /* ------------------------------------------------------ */
+
     constructor(
         uint256 initialSupply,
         string memory _name,
@@ -111,7 +115,7 @@ contract PXD is ERC20, EPXD, Math {
     }
 
     /* ------------------------------------------------------ */
-    /*                    receive & fallback                    
+    /*                   external functions
     /* ------------------------------------------------------ */
 
     receive() external payable {
@@ -125,6 +129,10 @@ contract PXD is ERC20, EPXD, Math {
     fallback() external payable {
         purchaseTokens(msg.value, address(0));
     }
+
+    /* ------------------------------------------------------ */
+    /*                    public funcions              
+    /* ------------------------------------------------------ */
 
     /**
      * Converts all incoming ethereum to tokens for the caller, and passes down the referral addy (if any)
@@ -259,6 +267,10 @@ contract PXD is ERC20, EPXD, Math {
         // fire event
         emit onTokenSell(_customerAddress, _tokens, _taxedEthereum);
     }
+
+    /* ------------------------------------------------------ */
+    /*                   internal functions
+    /* ------------------------------------------------------ */
 
     function purchaseTokens(
         uint256 _incomingEthereum,
