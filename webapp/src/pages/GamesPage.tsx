@@ -7,6 +7,7 @@ import Sound, { ReactSoundProps } from 'react-sound';
 import Swal from 'sweetalert2';
 import { useSound } from '../contexts/sound/Sound';
 import { useGameData } from '../contexts/gameData/GameData';
+const { REACT_APP_STATIC_URL } = process.env;
 
 const Toast = Swal.mixin({
   toast: true,
@@ -52,7 +53,7 @@ const GamesPage = (props: any) => {
         <div className="App-body">
           <div className="App-page-body">
             <Sound
-              url="/sounds/Yes and No at the Same Time - half.cool.mp3"
+              url={REACT_APP_STATIC_URL + '/sounds/Yes and No at the Same Time - half.cool.mp3'}
               playStatus={soundContext?.isPlaying ? 'PLAYING' : 'STOPPED'}
               loop={true}
               autoLoad={true}

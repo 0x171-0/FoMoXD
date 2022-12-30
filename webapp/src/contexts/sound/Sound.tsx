@@ -3,7 +3,7 @@ import { ReactSoundProps } from 'react-sound';
 const { REACT_APP_STATIC_URL } = process.env;
 
 export const SoundContext = createContext({
-  isPlaying: false,
+  isPlaying: true,
   setIsPlaying: (newState: boolean) => {},
   clickSound: new Audio(REACT_APP_STATIC_URL + '/sounds/car_trunk_O.mp3'),
   clickSound2: new Audio(REACT_APP_STATIC_URL + '/sounds/mobile_phone_C.mp3'),

@@ -4,6 +4,7 @@ import Sound, { ReactSoundProps } from 'react-sound';
 import { useSound } from '../contexts/sound/Sound';
 import { useGameData } from '../contexts/gameData/GameData';
 import { useWeb3 } from '../contexts/providers';
+const { REACT_APP_STATIC_URL } = process.env;
 
 const NftsPage = () => {
   const soundContext = useSound();
@@ -36,7 +37,7 @@ const NftsPage = () => {
   return (
     <Fragment>
       <Sound
-        url="/sounds/Jigglypuff.mp3"
+        url={REACT_APP_STATIC_URL + '/sounds/Jigglypuff.mp3'}
         playStatus={soundContext?.isPlaying ? 'PLAYING' : 'STOPPED'}
         loop={true}
         autoLoad={true}
