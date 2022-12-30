@@ -1,0 +1,39 @@
+{
+  "name": "Your Collection #18",
+  "description": "Remember to replace this description",
+  "image": "http://localhost:3000/nfts/images/18.png",
+  "dna": "b8046cedd5e9016719c8020b1f6e4ee12ea6bd29",
+  "edition": 18,
+  "date": 1670912838075,
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Black"
+    },
+    {
+      "trait_type": "Eyeball",
+      "value": "White"
+    },
+    {
+      "trait_type": "Eye color",
+      "value": "Green"
+    },
+    {
+      "trait_type": "Iris",
+      "value": "Small"
+    },
+    {
+      "trait_type": "Shine",
+      "value": "Shapes"
+    },
+    {
+      "trait_type": "Bottom lid",
+      "value": "Middle"
+    },
+    {
+      "trait_type": "Top lid",
+      "value": "High"
+    }
+  ],
+  "compiler": "HashLips Art Engine"
+}

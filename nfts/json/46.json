@@ -1,0 +1,39 @@
+{
+  "name": "Your Collection #46",
+  "description": "Remember to replace this description",
+  "image": "http://localhost:3000/nfts/images/46.png",
+  "dna": "ae38be9241e62b30d430480a11d79afc882bc676",
+  "edition": 46,
+  "date": 1670912853762,
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Black"
+    },
+    {
+      "trait_type": "Eyeball",
+      "value": "White"
+    },
+    {
+      "trait_type": "Eye color",
+      "value": "Purple"
+    },
+    {
+      "trait_type": "Iris",
+      "value": "Large"
+    },
+    {
+      "trait_type": "Shine",
+      "value": "Shapes"
+    },
+    {
+      "trait_type": "Bottom lid",
+      "value": "Middle"
+    },
+    {
+      "trait_type": "Top lid",
+      "value": "Middle"
+    }
+  ],
+  "compiler": "HashLips Art Engine"
+}

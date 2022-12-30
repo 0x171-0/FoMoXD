@@ -1,0 +1,39 @@
+{
+  "name": "Your Collection #49",
+  "description": "Remember to replace this description",
+  "image": "http://localhost:3000/nfts/images/49.png",
+  "dna": "8aac49dd74e03342d462bd9052cd5be1aeedc6a9",
+  "edition": 49,
+  "date": 1670912855108,
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Black"
+    },
+    {
+      "trait_type": "Eyeball",
+      "value": "Red"
+    },
+    {
+      "trait_type": "Eye color",
+      "value": "Yellow"
+    },
+    {
+      "trait_type": "Iris",
+      "value": "Large"
+    },
+    {
+      "trait_type": "Shine",
+      "value": "Shapes"
+    },
+    {
+      "trait_type": "Bottom lid",
+      "value": "Low"
+    },
+    {
+      "trait_type": "Top lid",
+      "value": "Middle"
+    }
+  ],
+  "compiler": "HashLips Art Engine"
+}

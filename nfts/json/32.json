@@ -1,0 +1,39 @@
+{
+  "name": "Your Collection #32",
+  "description": "Remember to replace this description",
+  "image": "http://localhost:3000/nfts/images/32.png",
+  "dna": "1a2a6750df509c6d6158a027238c05ef78f71875",
+  "edition": 32,
+  "date": 1670912845903,
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Black"
+    },
+    {
+      "trait_type": "Eyeball",
+      "value": "Red"
+    },
+    {
+      "trait_type": "Eye color",
+      "value": "Purple"
+    },
+    {
+      "trait_type": "Iris",
+      "value": "Small"
+    },
+    {
+      "trait_type": "Shine",
+      "value": "Shapes"
+    },
+    {
+      "trait_type": "Bottom lid",
+      "value": "Middle"
+    },
+    {
+      "trait_type": "Top lid",
+      "value": "High"
+    }
+  ],
+  "compiler": "HashLips Art Engine"
+}

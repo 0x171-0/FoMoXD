@@ -1,0 +1,39 @@
+{
+  "name": "Your Collection #1",
+  "description": "A delicious puff filled with a sweet or savory filling.",
+  "image": "http://localhost:3000/nfts/images/1.png",
+  "dna": "75e313cf2f54b7abcff09a7cab8c557510ab0c80",
+  "edition": 1,
+  "date": 1670912828673,
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Black"
+    },
+    {
+      "trait_type": "Eyeball",
+      "value": "White"
+    },
+    {
+      "trait_type": "Eye color",
+      "value": "Yellow"
+    },
+    {
+      "trait_type": "Iris",
+      "value": "Small"
+    },
+    {
+      "trait_type": "Shine",
+      "value": "Shapes"
+    },
+    {
+      "trait_type": "Bottom lid",
+      "value": "Low"
+    },
+    {
+      "trait_type": "Top lid",
+      "value": "Low"
+    }
+  ],
+  "compiler": "HashLips Art Engine"
+}

@@ -1,0 +1,39 @@
+{
+  "name": "Your Collection #44",
+  "description": "Remember to replace this description",
+  "image": "http://localhost:3000/nfts/images/44.png",
+  "dna": "74c1827c0911a035666bc838a7873504dfcc6006",
+  "edition": 44,
+  "date": 1670912852711,
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Black"
+    },
+    {
+      "trait_type": "Eyeball",
+      "value": "Red"
+    },
+    {
+      "trait_type": "Eye color",
+      "value": "Red"
+    },
+    {
+      "trait_type": "Iris",
+      "value": "Large"
+    },
+    {
+      "trait_type": "Shine",
+      "value": "Shapes"
+    },
+    {
+      "trait_type": "Bottom lid",
+      "value": "Middle"
+    },
+    {
+      "trait_type": "Top lid",
+      "value": "Middle"
+    }
+  ],
+  "compiler": "HashLips Art Engine"
+}

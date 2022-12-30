@@ -1,0 +1,39 @@
+{
+  "name": "Your Collection #4",
+  "description": "A delicious puff is a light and airy pastry that is crispy on the outside.",
+  "image": "http://localhost:3000/nfts/images/4.png",
+  "dna": "594219bfa83c650c4811a0db3ad0c2ec03f5bdf2",
+  "edition": 4,
+  "date": 1670912830826,
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Black"
+    },
+    {
+      "trait_type": "Eyeball",
+      "value": "Red"
+    },
+    {
+      "trait_type": "Eye color",
+      "value": "Yellow"
+    },
+    {
+      "trait_type": "Iris",
+      "value": "Medium"
+    },
+    {
+      "trait_type": "Shine",
+      "value": "Shapes"
+    },
+    {
+      "trait_type": "Bottom lid",
+      "value": "Low"
+    },
+    {
+      "trait_type": "Top lid",
+      "value": "Middle"
+    }
+  ],
+  "compiler": "HashLips Art Engine"
+}
