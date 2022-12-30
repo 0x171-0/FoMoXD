@@ -1,7 +1,7 @@
 {
   "name": "Your Collection #5",
   "description": "A delicious puff is a tasty treat that has a crispy exterior.",
-  "image": "http://localhost:3000/nfts/images/5.png",
+  "image": "https://raw.githubusercontent.com/0x171-0/fomoxd/dev/webapp/public/nfts/images/5.png",
   "dna": "82c5ae136de47a627f25569d5d128f1de076a85b",
   "edition": 5,
   "date": 1670912831427,

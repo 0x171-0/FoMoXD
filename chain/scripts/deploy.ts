@@ -13,20 +13,22 @@ async function main() {
   const foMoERC721 = await upgrades.deployProxy(FoMoERC721, [
     "fomoERC721",
     "FMO",
-    "http://localhost:3000/nfts/json/mystery_box.json",
+    "https://raw.githubusercontent.com/0x171-0/fomoxd/dev/webapp/public/nfts/json/mystery_box.json",
   ]);
 
   await foMoERC721.setRoundMysteryURI(
     2,
-    "http://localhost:3000/nfts/json/mystery_1.json"
+    "https://raw.githubusercontent.com/0x171-0/fomoxd/dev/webapp/public/nfts/json/mystery_1.json"
   );
 
   await foMoERC721.setRoundMysteryURI(
     3,
-    "http://localhost:3000/nfts/json/mystery_2.json"
+    "https://raw.githubusercontent.com/0x171-0/fomoxd/dev/webapp/public/nfts/json/mystery_2.json"
   );
 
-  await foMoERC721.setBaseURI("http://localhost:3000/nfts/json/");
+  await foMoERC721.setBaseURI(
+    "https://raw.githubusercontent.com/0x171-0/fomoxd/dev/webapp/public/nfts/json/"
+  );
 
   console.log(`[FoMoERC721] Deployed to ${foMoERC721.address}`);
   /* ---------------------- Community --------------------- */

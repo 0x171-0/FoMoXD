@@ -43,7 +43,7 @@ export const nfts = [
     state: 'dark',
     connection: 'broker.emqx.io:1883',
     onOff: false,
-    url: 'http://localhost:3000/ntfs/mystery_box.png'
+    url: 'https://raw.githubusercontent.com/0x171-0/fomoxd/dev/webapp/public/ntfs/mystery_box.png'
   },
   {
     icon: '💡',
@@ -53,7 +53,7 @@ export const nfts = [
     state: 'dark',
     connection: 'broker.emqx.io:1883',
     onOff: false,
-    url: 'http://localhost:3000/ntfs/mystery_box.png'
+    url: 'https://raw.githubusercontent.com/0x171-0/fomoxd/dev/webapp/public/ntfs/mystery_box.png'
   },
   {
     icon: '🔦',
@@ -63,7 +63,7 @@ export const nfts = [
     state: 'dark',
     connection: 'broker.emqx.io:1883',
     onOff: false,
-    url: 'http://localhost:3000/ntfs/mystery_box.png'
+    url: 'https://raw.githubusercontent.com/0x171-0/fomoxd/dev/webapp/public/ntfs/mystery_box.png'
   },
   {
     icon: '🚏',
@@ -73,7 +73,7 @@ export const nfts = [
     state: 'dark',
     connection: 'broker.emqx.io:1883',
     onOff: false,
-    url: 'http://localhost:3000/ntfs/mystery_box.png'
+    url: 'https://raw.githubusercontent.com/0x171-0/fomoxd/dev/webapp/public/ntfs/mystery_box.png'
   },
   {
     icon: '🔦',
@@ -83,7 +83,7 @@ export const nfts = [
     state: 'dark',
     connection: 'broker.emqx.io:1883',
     onOff: false,
-    url: 'http://localhost:3000/ntfs/mystery_box.png'
+    url: 'https://raw.githubusercontent.com/0x171-0/fomoxd/dev/webapp/public/ntfs/mystery_box.png'
   },
   {
     icon: '🚏',
@@ -93,6 +93,6 @@ export const nfts = [
     state: 'dark',
     connection: 'broker.emqx.io:1883',
     onOff: false,
-    url: 'http://localhost:3000/ntfs/mystery_box.png'
+    url: 'https://raw.githubusercontent.com/0x171-0/fomoxd/dev/webapp/public/ntfs/mystery_box.png'
   }
 ];
