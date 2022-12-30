@@ -1,14 +1,14 @@
 {
   "files": {
-    "main.css": "/FoMoXD/static/css/main.aceb960c.css",
-    "main.js": "/FoMoXD/static/js/main.f00d0710.js",
-    "static/media/retro-city-sunset-digital-art.jpg": "/FoMoXD/static/media/retro-city-sunset-digital-art.ba476cc342ef07c3ddc5.jpg",
-    "index.html": "/FoMoXD/index.html",
-    "main.aceb960c.css.map": "/FoMoXD/static/css/main.aceb960c.css.map",
-    "main.f00d0710.js.map": "/FoMoXD/static/js/main.f00d0710.js.map"
+    "main.css": "/FoMoxd/static/css/main.72e892c8.css",
+    "main.js": "/FoMoxd/static/js/main.a9c3e925.js",
+    "static/media/retro-city-sunset-digital-art.jpg": "/FoMoxd/static/media/retro-city-sunset-digital-art.ba476cc342ef07c3ddc5.jpg",
+    "index.html": "/FoMoxd/index.html",
+    "main.72e892c8.css.map": "/FoMoxd/static/css/main.72e892c8.css.map",
+    "main.a9c3e925.js.map": "/FoMoxd/static/js/main.a9c3e925.js.map"
   },
   "entrypoints": [
-    "static/css/main.aceb960c.css",
-    "static/js/main.f00d0710.js"
+    "static/css/main.72e892c8.css",
+    "static/js/main.a9c3e925.js"
   ]
 }
