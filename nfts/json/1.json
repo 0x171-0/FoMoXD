@@ -1,7 +1,7 @@
 {
   "name": "Your Collection #1",
   "description": "A delicious puff filled with a sweet or savory filling.",
-  "image": "http://localhost:3000/nfts/images/1.png",
+  "image": "https://raw.githubusercontent.com/0x171-0/fomoxd/dev/webapp/public/nfts/images/1.png",
   "dna": "75e313cf2f54b7abcff09a7cab8c557510ab0c80",
   "edition": 1,
   "date": 1670912828673,

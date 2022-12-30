@@ -1,7 +1,7 @@
 {
   "name": "Your Collection #2",
   "description": "Include fruit, custard, cheese, and meat. ",
-  "image": "http://localhost:3000/nfts/images/2.png",
+  "image": "https://raw.githubusercontent.com/0x171-0/fomoxd/dev/webapp/public/nfts/images/2.png",
   "dna": "6df034b693ab91ac7aff321dbf6338550c582d7a",
   "edition": 2,
   "date": 1670912829568,

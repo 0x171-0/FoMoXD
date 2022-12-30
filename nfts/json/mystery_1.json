@@ -1,5 +1,5 @@
 {
   "name": "Mystery box",
   "description": "Please wait for reveal",
-  "image": "http://localhost:3000/nfts/images/mystery_1.png"
+  "image": "https://raw.githubusercontent.com/0x171-0/fomoxd/dev/webapp/public/nfts/images/mystery_1.png"
 }

@@ -1,7 +1,7 @@
 {
   "name": "Your Collection #23",
   "description": "Remember to replace this description",
-  "image": "http://localhost:3000/nfts/images/23.png",
+  "image": "https://raw.githubusercontent.com/0x171-0/fomoxd/dev/webapp/public/nfts/images/23.png",
   "dna": "3ec3f91d2f49ef6b0ab061c4873f812a017c3e85",
   "edition": 23,
   "date": 1670912840405,

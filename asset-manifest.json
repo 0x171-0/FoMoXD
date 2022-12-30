@@ -1,14 +1,14 @@
 {
   "files": {
     "main.css": "/fomoxd/static/css/main.3085effb.css",
-    "main.js": "/fomoxd/static/js/main.75212370.js",
+    "main.js": "/fomoxd/static/js/main.36d588f3.js",
     "static/media/retro-city-sunset-digital-art.jpg": "/fomoxd/static/media/retro-city-sunset-digital-art.ba476cc342ef07c3ddc5.jpg",
     "index.html": "/fomoxd/index.html",
     "main.3085effb.css.map": "/fomoxd/static/css/main.3085effb.css.map",
-    "main.75212370.js.map": "/fomoxd/static/js/main.75212370.js.map"
+    "main.36d588f3.js.map": "/fomoxd/static/js/main.36d588f3.js.map"
   },
   "entrypoints": [
     "static/css/main.3085effb.css",
-    "static/js/main.75212370.js"
+    "static/js/main.36d588f3.js"
   ]
 }
