@@ -7,7 +7,8 @@ import { loadContractWithAddress } from '../../../utils/loadContract';
 const {
   REACT_APP_FOMO_CONTRACT_ADDRESS,
   REACT_APP_RPC_URL,
-  REACT_APP_FOMOERC721_CONTRACT_ADDRESS
+  REACT_APP_FOMOERC721_CONTRACT_ADDRESS,
+  REACT_APP_GOERLI_CHAIN_ID
 } = process.env;
 const Web3Context = createContext(null);
 
@@ -71,7 +72,12 @@ async function switchNetwork(provider: any) {
   try {
     await provider.request({
       method: 'wallet_switchEthereumChain',
-      params: [{ chainId: '0x' + (31337).toString(16) }]
+      params: [
+        {
+          chainId:
+            '0x' + (parseInt(REACT_APP_GOERLI_CHAIN_ID || '31337', 10) as number).toString(16)
+        }
+      ]
     });
   } catch (error) {
     Toast.fire({
@@ -147,7 +153,13 @@ export default function Web3Provider(props: any) {
             });
             await provider.request({
               method: 'wallet_switchEthereumChain',
-              params: [{ chainId: '0x' + (31337).toString(16) }]
+              params: [
+                {
+                  chainId:
+                    '0x' +
+                    (parseInt(REACT_APP_GOERLI_CHAIN_ID || '31337', 10) as number).toString(16)
+                }
+              ]
             });
             window.location.reload();
           } else if (result.isDenied) {
@@ -179,13 +191,15 @@ export default function Web3Provider(props: any) {
           web3
         );
         const [newAccount] = await web3.eth.getAccounts();
-        if (lastAcoount !== newAccount || !foMoERC721) {
+        if (lastAcoount !== newAccount || !foMoERC721 || !fomoXdContract) {
           lastAcoount = newAccount;
           setAccount(newAccount);
-          Toast.fire({
-            icon: 'success',
-            title: 'Connected to Metamask.'
-          });
+          if (fomoXdContract && newAccount) {
+            Toast.fire({
+              icon: 'success',
+              title: 'Connected to Metamask.'
+            });
+          }
           setWeb3Api((api: any) => ({
             ...api,
             account: newAccount,

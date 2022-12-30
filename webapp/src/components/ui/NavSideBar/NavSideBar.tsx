@@ -18,7 +18,7 @@ const Toast = Swal.mixin({
   }
 });
 const NavSideBar = (props: any) => {
-  const { connect, switchNetwork, fomoXdContract, account, disconnect } = useWeb3();
+  const { connect, switchNetwork, fomoXdContract, foMoERC721, account, disconnect } = useWeb3();
   const { roundId, endTime, setRoundId, fetchNewRound } = useGameData();
   const soundContext = useSound();
 
@@ -38,7 +38,7 @@ const NavSideBar = (props: any) => {
   };
 
   const onClickPickRoundHandler = async (e: React.MouseEvent) => {
-    new Audio('/sounds/car_trunk_O.mp3').play();
+    soundContext.clickSound.play();
     const newRoundId = await fomoXdContract?.methods?.roundID_().call();
     let index = newRoundId as number;
     const inputOptions: any = {};
@@ -75,7 +75,7 @@ const NavSideBar = (props: any) => {
   };
 
   const onClickMetaMaskHandler = (e: React.MouseEvent) => {
-    new Audio('/sounds/car_trunk_O.mp3').play();
+    soundContext.clickSound.play();
     if (connected) {
       disconnect();
     } else {
@@ -94,7 +94,7 @@ const NavSideBar = (props: any) => {
             style={{ textDecoration: 'none' }}
             to="/"
             onClick={(e: React.MouseEvent) => {
-              new Audio('/sounds/car_trunk_O.mp3').play();
+              soundContext.clickSound.play();
             }}>
             <span>🧁 </span>
             <span> FomoXD </span>
@@ -112,7 +112,7 @@ const NavSideBar = (props: any) => {
               className="nav-bar-icon"
               to="/nfts"
               onClick={(e: React.MouseEvent) => {
-                new Audio('/sounds/car_trunk_O.mp3').play();
+                soundContext.clickSound.play();
                 Toast.fire({
                   icon: 'success',
                   title: `🖼️ Here is your NFTs`
@@ -132,7 +132,7 @@ const NavSideBar = (props: any) => {
               className="nav-bar-icon"
               to="/exit-scam"
               onClick={onClickMetaMaskHandler}>
-              <h5>{connected ? '🦊' : '🫥'}</h5>
+              <h5>{connected && fomoXdContract ? '🦊' : '🫥'}</h5>
             </Link>
             <div
               style={{ textDecoration: 'none' }}

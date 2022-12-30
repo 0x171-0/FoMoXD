@@ -22,7 +22,7 @@ const Toast = Swal.mixin({
 
 const GamesPage = (props: any) => {
   const params = useParams();
-  const soundContext = useSound();
+
   const game = useGameData();
   const {
     endTime,
@@ -39,6 +39,7 @@ const GamesPage = (props: any) => {
     roundId,
     buyName
   } = game;
+  const soundContext = useSound();
 
   const teams = JSON.parse(localStorage.getItem('teams') as string);
   const noTeams = <p>Not devices</p>;
@@ -86,10 +87,10 @@ const GamesPage = (props: any) => {
                       info={info}
                       key={info.id}
                       state={checkTeamActive(index + 1)}
-                      onClick={() => {
+                      onClick={async () => {
                         checkTeamActive(index + 1)
-                          ? new Audio('/sounds/mobile_phone_O.mp3').play()
-                          : new Audio('/sounds/mobile_phone_C.mp3').play();
+                          ? await soundContext.clickSound3.play()
+                          : await soundContext.clickSound2.play();
                         handleTeamClick(index + 1);
                       }}></Cube>
                   );

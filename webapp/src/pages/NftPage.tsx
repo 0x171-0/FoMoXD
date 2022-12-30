@@ -42,11 +42,7 @@ const NftsPage = () => {
         autoLoad={true}
         volume={30}
       />
-      ;
-      <CubeLayout
-        items={nftsMeta}
-        title={'PUFFS NFTS'}></CubeLayout>
-      ;
+      ;<CubeLayout items={nftsMeta} title={'PUFFS NFTS'}></CubeLayout>;
     </Fragment>
   );
 };

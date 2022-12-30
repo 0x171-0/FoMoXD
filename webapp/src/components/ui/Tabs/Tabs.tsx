@@ -4,6 +4,7 @@ import BaseInput from '../BaseInput';
 import './Tabs.css';
 import Swal from 'sweetalert2';
 import Web3 from 'web3';
+import { useSound } from '../../../contexts/sound/Sound';
 const Toast = Swal.mixin({
   toast: true,
   position: 'bottom-end',
@@ -29,17 +30,18 @@ const Tabs = (props: any) => {
     buyName,
     params
   } = props;
-  if (!fomoXdContract) {
-    Toast.fire({
-      icon: 'error',
-      title: `🦊 Fail to load web3. Please reload.`
-    });
-  }
+  const soundContext = useSound();
+  // if (!fomoXdContract) {
+  //   Toast.fire({
+  //     icon: 'error',
+  //     title: `🦊 Fail to load web3. Please reload.`
+  //   });
+  // }
   const [activeTabIndex, setActiveTabIndex] = useState(1);
 
   const handleTabClick = (index: number) => {
     setActiveTabIndex(index);
-    new Audio('/sounds/mobile_phone_C.mp3').play();
+    soundContext.clickSound2.play();
   };
   const checkActive = (index: number, className: string) =>
     activeTabIndex === index ? className : '';
@@ -88,7 +90,7 @@ const Tabs = (props: any) => {
                 className="form-control"
                 value={Number(wantXPuffs) || 0}
                 onChange={async (e: any) => {
-                  new Audio('/sounds/coin.wav').play();
+                  soundContext.coinSound.play();
                   updatePuffsAndETH(e.target.value);
                 }}
               />
@@ -98,7 +100,7 @@ const Tabs = (props: any) => {
                 className="form-control"
                 disabled={true}
                 onClick={(e: any) => {
-                  new Audio('/sounds/coin.wav').play();
+                  soundContext.coinSound.play();
                   updatePuffsAndETH(Number(wantXPuffs) + 100);
                 }}
               />
@@ -108,7 +110,7 @@ const Tabs = (props: any) => {
                 type="button"
                 className="btn btn-outline-warning"
                 onClick={async (e: any) => {
-                  new Audio('/sounds/coin.wav').play();
+                  soundContext.coinSound.play();
                   updatePuffsAndETH(Number(wantXPuffs) + 1);
                 }}>
                 + 1 Puff
@@ -117,7 +119,7 @@ const Tabs = (props: any) => {
                 type="button"
                 className="btn btn-outline-warning"
                 onClick={async (e: any) => {
-                  new Audio('/sounds/coin.wav').play();
+                  soundContext.coinSound.play();
                   updatePuffsAndETH(Number(wantXPuffs) + 2);
                 }}>
                 + 2 Puffs
@@ -126,7 +128,7 @@ const Tabs = (props: any) => {
                 type="button"
                 className="increment-button btn btn-outline-warning"
                 onClick={async (e: any) => {
-                  new Audio('/sounds/coin.wav').play();
+                  soundContext.coinSound.play();
                   updatePuffsAndETH(Number(wantXPuffs) + 5);
                 }}>
                 <div>+</div>5
@@ -135,7 +137,7 @@ const Tabs = (props: any) => {
                 type="button"
                 className="increment-button btn btn-outline-warning"
                 onClick={async (e: any) => {
-                  new Audio('/sounds/coin.wav').play();
+                  soundContext.coinSound.play();
                   updatePuffsAndETH(Number(wantXPuffs) + 10);
                 }}>
                 <div>+</div>10
@@ -144,7 +146,7 @@ const Tabs = (props: any) => {
                 type="button"
                 className="increment-button btn btn-outline-warning"
                 onClick={(e: any) => {
-                  new Audio('/sounds/coin.wav').play();
+                  soundContext.coinSound.play();
                   updatePuffsAndETH(Number(wantXPuffs) + 100);
                 }}>
                 <div>+</div>100

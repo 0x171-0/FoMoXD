@@ -1,13 +1,14 @@
-import React from "react";
-import useSWR from "swr";
+import React from 'react';
+import useSWR from 'swr';
 import Swal from 'sweetalert2';
 
 const targetNetwork = 31337; // Hardhat Tesnet
 // const targetNetwork = 1337; // Ganache
 
+const { REACT_APP_GOERLI_CHAIN_ID } = process.env;
 export const handler = (web3: any, provider: any) => () => {
   const { data, mutate, ...rest } = useSWR(
-    () => (web3 ? "web3/network" : null),
+    () => (web3 ? 'web3/network' : null),
     async () => {
       let chainId = await web3.eth.getChainId();
       if (chainId !== 31337) {
@@ -30,8 +31,14 @@ export const handler = (web3: any, provider: any) => () => {
           if (result.isConfirmed) {
             Swal.fire('Saved!', '', 'success');
             await provider.request({
-              method: "wallet_switchEthereumChain",
-              params: [{ chainId: "0x" + (31337).toString(16) }],
+              method: 'wallet_switchEthereumChain',
+              params: [
+                {
+                  chainId:
+                    '0x' +
+                    (parseInt(REACT_APP_GOERLI_CHAIN_ID || '31337', 10) as number).toString(16)
+                }
+              ]
             });
             chainId = await web3.eth.getChainId();
           } else if (result.isDenied) {
@@ -40,7 +47,7 @@ export const handler = (web3: any, provider: any) => () => {
         });
       }
       if (!chainId) {
-        throw new Error("Cannot retreive network. Please refresh the browser.");
+        throw new Error('Cannot retreive network. Please refresh the browser.');
       }
       return chainId;
     }
@@ -48,7 +55,7 @@ export const handler = (web3: any, provider: any) => () => {
 
   React.useEffect(() => {
     provider &&
-      provider.on("chainChanged", (chainId: string) => {
+      provider.on('chainChanged', (chainId: string) => {
         mutate(parseInt(chainId, 16));
       });
   }, [mutate]);
@@ -58,6 +65,6 @@ export const handler = (web3: any, provider: any) => () => {
     mutate,
     target: targetNetwork,
     isSupported: data === targetNetwork,
-    ...rest,
+    ...rest
   };
 };

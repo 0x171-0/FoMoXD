@@ -1,6 +1,7 @@
 import Swal from 'sweetalert2';
 import Web3Lib from 'web3';
 export const TeamsArr = ['🍫 ', '🍌 ', '🍓 ', '🥝 '];
+const { REACT_APP_STATIC_URL } = process.env;
 
 const Toast = Swal.mixin({
   toast: true,
@@ -66,7 +67,7 @@ export default class GameHelper {
     };
   }) {
     const { wantXPuffs, activeTeamIndex, puffsToETH, aff } = opt;
-    new Audio('/sounds/coin.wav').play();
+    new Audio(REACT_APP_STATIC_URL + '/sounds/coin.wav').play();
 
     if (wantXPuffs <= 0 || puffsToETH <= 0) {
       Toast.fire({
