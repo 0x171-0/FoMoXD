@@ -1,5 +1,8 @@
-# 🧁 FoMoXD - Blockchain Dapp
+# [🧁 FoMoXD - Blockchain Dapp](https://0x171-0.github.io/fomoxd)
+
 ## A Lottery Ponzi Game
+
+Demo website : <https://0x171-0.github.io/fomoxd>
 
 <img src="./docs/FomoXD.gif"></img>
 #### Rules
