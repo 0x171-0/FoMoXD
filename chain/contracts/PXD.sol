@@ -5,14 +5,20 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "./event/EPXD.sol";
 
 import "./library/Math.sol";
+import "./interface/IPXD.sol";
 
-contract PXD is ERC20, EPXD, Math {
+contract PXD is ERC20, EPXD, Math, IPXD {
     /* ------------------------------------------------------ */
     /*                      CONFIGURABLES                     */
     /* ------------------------------------------------------ */
-    uint8 internal constant dividendFee_ = 10;
+    uint8 internal constant dividendFee_ = 10; // 買賣幣都會抽取 10% 手續費
+
+    /// @dev 最一開始的價格
     uint256 internal constant tokenPriceInitial_ = 0.0000001 ether;
+
+    ///
     uint256 internal constant tokenPriceIncremental_ = 0.00000001 ether;
+
     uint256 internal constant magnitude = 2 ** 64;
 
     // proof of stake (defaults at 100 tokens)
@@ -134,16 +140,10 @@ contract PXD is ERC20, EPXD, Math {
     /*                    public funcions              
     /* ------------------------------------------------------ */
 
-    /**
-     * Converts all incoming ethereum to tokens for the caller, and passes down the referral addy (if any)
-     */
     function buy(address _referredBy) public payable returns (uint256) {
         purchaseTokens(msg.value, _referredBy);
     }
 
-    /**
-     * Converts all of caller's dividends to tokens.
-     */
     function reinvest() public onlyStronghands {
         // fetch dividends
         uint256 _dividends = myDividends(false); // retrieve ref. bonus later in the code
@@ -163,9 +163,16 @@ contract PXD is ERC20, EPXD, Math {
         emit onReinvestment(_customerAddress, _dividends, _tokens);
     }
 
-    /**
-     * Withdraws all of the callers earnings.
-     */
+    function exit() public {
+        // get token count for caller & sell them all
+        address _customerAddress = msg.sender;
+        uint256 _tokens = tokenBalanceLedger_[_customerAddress];
+        if (_tokens > 0) sell(_tokens);
+
+        // lambo delivery service
+        withdraw();
+    }
+
     function withdraw() public onlyStronghands {
         // setup data
         address _customerAddress = msg.sender;
@@ -185,20 +192,11 @@ contract PXD is ERC20, EPXD, Math {
         emit onWithdraw(_customerAddress, _dividends);
     }
 
-    /**
-     * Retrieve the tokens owned by the caller.
-     */
     function myTokens() public view returns (uint256) {
         address _customerAddress = msg.sender;
         return balanceOf(_customerAddress);
     }
 
-    /**
-     * Retrieve the dividends owned by the caller.
-     * If `_includeReferralBonus` is to to 1/true, the referral bonus will be included in the calculations.
-     * The reason for this, is that in the frontend, we will want to get the total divs (global + ref)
-     * But in the internal calculations, we want them separate.
-     */
     function myDividends(
         bool _includeReferralBonus
     ) public view returns (uint256) {
@@ -210,9 +208,6 @@ contract PXD is ERC20, EPXD, Math {
                 : dividendsOf(_customerAddress);
     }
 
-    /**
-     * Retrieve the dividend balance of any single address.
-     */
     function dividendsOf(
         address _customerAddress
     ) public view returns (uint256) {
@@ -224,18 +219,21 @@ contract PXD is ERC20, EPXD, Math {
             ) / magnitude;
     }
 
-    /*----------  HELPERS AND CALCULATORS  ----------*/
     /**
-     * Method to view the current Ethereum stored in the contract
-     * Example: totalEthereumBalance()
+     * Retrieve the token balance of any single address.
      */
+    function balanceOf(
+        address _customerAddress
+    ) public view override(ERC20, IPXD) returns (uint256) {
+        return tokenBalanceLedger_[_customerAddress];
+    }
+
+    /*----------  HELPERS AND CALCULATORS  ----------*/
+
     function totalEthereumBalance() public view returns (uint) {
         return address(this).balance;
     }
 
-    /**
-     * Liquifies tokens to ethereum.
-     */
     function sell(uint256 _amountOfTokens) public onlyBagholders {
         // setup data
         address _customerAddress = msg.sender;
@@ -243,7 +241,7 @@ contract PXD is ERC20, EPXD, Math {
         require(_amountOfTokens <= tokenBalanceLedger_[_customerAddress]);
         uint256 _tokens = _amountOfTokens;
         uint256 _ethereum = tokensToEthereum_(_tokens);
-        uint256 _dividends = (_ethereum / dividendFee_);
+        uint256 _dividends = (_ethereum / dividendFee_); // 抽取 10% 手續費
         uint256 _taxedEthereum = (_ethereum - _dividends);
 
         // burn the sold tokens
@@ -268,6 +266,53 @@ contract PXD is ERC20, EPXD, Math {
         emit onTokenSell(_customerAddress, _tokens, _taxedEthereum);
     }
 
+    function transfer(
+        address _toAddress,
+        uint256 _amountOfTokens
+    ) public override(ERC20, IPXD) onlyBagholders returns (bool) {
+        // setup
+        address _customerAddress = msg.sender;
+
+        // make sure we have the requested tokens
+        // also disables transfers until ambassador phase is over
+        // ( we dont want whale premines )
+        require(
+            !onlyAmbassadors &&
+                _amountOfTokens <= tokenBalanceLedger_[_customerAddress]
+        );
+
+        // withdraw all outstanding dividends first
+        if (myDividends(true) > 0) withdraw();
+
+        // liquify 10% of the tokens that are transfered
+        // these are dispersed to shareholders
+        uint256 _tokenFee = _amountOfTokens / dividendFee_;
+        uint256 _taxedTokens = _amountOfTokens - _tokenFee;
+        uint256 _dividends = tokensToEthereum_(_tokenFee);
+
+        // burn the fee tokens
+        tokenSupply_ -= _tokenFee;
+
+        // exchange tokens
+        tokenBalanceLedger_[_customerAddress] -= _amountOfTokens;
+        tokenBalanceLedger_[_toAddress] += _taxedTokens;
+
+        // update dividend trackers
+        payoutsTo_[_customerAddress] -= (int256)(
+            profitPerShare_ * _amountOfTokens
+        );
+        payoutsTo_[_toAddress] += (int256)(profitPerShare_ * _taxedTokens);
+
+        // disperse dividends among holders
+        profitPerShare_ += (_dividends * magnitude) / tokenSupply_;
+
+        // fire event
+        Transfer(_customerAddress, _toAddress, _taxedTokens);
+
+        // ERC20
+        return true;
+    }
+
     /* ------------------------------------------------------ */
     /*                   internal functions
     /* ------------------------------------------------------ */
@@ -278,10 +323,10 @@ contract PXD is ERC20, EPXD, Math {
     ) internal antiEarlyWhale(_incomingEthereum) returns (uint256) {
         // data setup
         address _customerAddress = msg.sender;
-        uint256 _undividedDividends = _incomingEthereum / dividendFee_; // 分红 0.1
-        uint256 _referralBonus = _undividedDividends / 3; // 分红的三分之一给推广员
-        uint256 _dividends = _undividedDividends - _referralBonus; // 真正属于分红的钱
-        uint256 _taxedEthereum = _incomingEthereum - _undividedDividends; // 扣完分红后的钱，用来买币
+        uint256 _undividedDividends = _incomingEthereum / dividendFee_; // 抽取 10% 手續費
+        uint256 _referralBonus = _undividedDividends / 3; // 分红三分之一給推薦者
+        uint256 _dividends = _undividedDividends - _referralBonus; // 真正属於分红的錢
+        uint256 _taxedEthereum = _incomingEthereum - _undividedDividends; // 扣完分红後的钱，用来買幣
         uint256 _amountOfTokens = ethereumToTokens_(_taxedEthereum);
         uint256 _fee = _dividends * magnitude;
 
@@ -361,19 +406,40 @@ contract PXD is ERC20, EPXD, Math {
         uint256 _ethereum
     ) internal view returns (uint256) {
         uint256 _tokenPriceInitial = tokenPriceInitial_ * 1e18;
-        uint256 _tokensReceived = ((// underflow attempts BTFO
+        // uint256 _tokensReceived = ((
+        //     // underflow attempts BTFO
+        //     SafeMath.sub(
+        //         (
+        //             sqrt(
+        //                 (_tokenPriceInitial ** 2) +
+        //                     (2 *
+        //                         (tokenPriceIncremental_ * 1e18) *
+        //                         (_ethereum * 1e18)) +
+        //                     (((tokenPriceIncremental_) ** 2) *
+        //                         (tokenSupply_ ** 2)) +
+        //                     (2 *
+        //                         (tokenPriceIncremental_) *
+        //                         _tokenPriceInitial *
+        //                         tokenSupply_)
+        //             )
+        //         ),
+        //         _tokenPriceInitial
+        //     )
+        // ) / (tokenPriceIncremental_)) - (tokenSupply_);
 
-        (
-            sqrt(
-                (_tokenPriceInitial ** 2) +
-                    (2 * (tokenPriceIncremental_ * 1e18) * (_ethereum * 1e18)) +
-                    (((tokenPriceIncremental_) ** 2) * (tokenSupply_ ** 2)) +
-                    (2 *
-                        (tokenPriceIncremental_) *
-                        _tokenPriceInitial *
-                        tokenSupply_)
-            )
-        ) - _tokenPriceInitial) / (tokenPriceIncremental_)) - (tokenSupply_);
+        uint256 _tokensReceived = ((// underflow attempts BTFO
+        sqrt(
+            _tokenPriceInitial ** 2 +
+                2 *
+                (tokenPriceIncremental_ * 1e18) *
+                (_ethereum * 1e18) +
+                tokenPriceIncremental_ ** 2 *
+                tokenSupply_ ** 2 +
+                2 *
+                tokenPriceIncremental_ *
+                _tokenPriceInitial *
+                tokenSupply_
+        ) - _tokenPriceInitial) / tokenPriceIncremental_) - tokenSupply_;
 
         return _tokensReceived;
     }

@@ -4,6 +4,11 @@ pragma solidity ^0.8.17;
 import "./interface/IPXD.sol";
 import "./event/EDivies.sol";
 
+/*
+ * - Divies -
+ * -> What do this contract do?
+ *  - 分潤給
+ */
 contract Divies is EDivies {
     IPXD PXDcontract_;
 
@@ -62,12 +67,13 @@ contract Divies is EDivies {
         );
 
         // data setup
-        address _pusher = msg.sender;
-        uint256 _bal = address(this).balance;
+        address _pusher = msg.sender; // 觸發分潤的人
+        uint256 _balance = address(this).balance; // 目前待分潤的餘額
         uint256 _mnPayout;
         // uint256 _compressedData;
 
         // limit pushers greed (use "if" instead of require for level 42 top kek)
+        /// @dev 同一個使用者，在一個小時內、100 個觸發者內只能觸發一次
         if (
             pushers_[_pusher].tracker <= pusherTracker_ - 100 && // pusher is greedy: wait your turn
             pushers_[_pusher].time + 1 hours < block.timestamp // pusher is greedy: its not even been 1 hour
@@ -78,15 +84,16 @@ contract Divies is EDivies {
 
             // setup mn payout for event
             if (
+                // 必需要有質押貸幣才可以當觸發者
                 PXDcontract_.balanceOf(_pusher) >=
                 PXDcontract_.stakingRequirement()
-            ) _mnPayout = (_bal / 10) / 3;
+            ) _mnPayout = (_balance / 10) / 3;
 
             // setup _stop.  this will be used to tell the loop to stop
-            uint256 _stop = (_bal * (100 - _percent)) / 100;
+            uint256 _stop = (_balance * (100 - _percent)) / 100;
 
             // buy & sell
-            PXDcontract_.buy{value: _bal}(_pusher);
+            PXDcontract_.buy{value: _balance}(_pusher);
             PXDcontract_.sell(PXDcontract_.balanceOf(address(this)));
 
             // setup tracker.  this will be used to tell the loop to stop
@@ -102,32 +109,14 @@ contract Divies is EDivies {
                 _tracker = (_tracker * (81)) / 100;
             }
 
-            // withdraw
+            // withdraw 領取分紅
             PXDcontract_.withdraw();
-        } else {
-            // _compressedData = _compressedData.insert(1, 47, 47);
         }
 
         // update pushers timestamp  (do outside of "if" for super saiyan level top kek)
         pushers_[_pusher].time = block.timestamp;
 
-        // prep event compression data
-        // _compressedData = _compressedData.insert(now, 0, 14);
-        // _compressedData = _compressedData.insert(
-        //     pushers_[_pusher].tracker,
-        //     15,
-        //     29
-        // );
-        // _compressedData = _compressedData.insert(pusherTracker_, 30, 44);
-        // _compressedData = _compressedData.insert(_percent, 45, 46);
-
         // fire event
-        emit onDistribute(
-            _pusher,
-            _bal,
-            _mnPayout,
-            address(this).balance
-            // _compressedData
-        );
+        emit onDistribute(_pusher, _balance, _mnPayout, address(this).balance);
     }
 }
