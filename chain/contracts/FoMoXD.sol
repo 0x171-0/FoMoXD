@@ -407,11 +407,11 @@ contract FoMoXD is EFoMoXD {
         if (_eth >= 10000000000000000000) {
             return 75;
         } else if (
-            _eth >= 1000000000000000000 && // 1 eth
+            _eth >= 1e18 && // 1 eth
             _eth < 10000000000000000000 // 10 eth
         ) {
             return 50;
-        } else if (_eth >= 100000000000000000 && _eth < 1000000000000000000) {
+        } else if (_eth >= 100000000000000000 && _eth < 1e18) {
             return 25;
         }
     }
@@ -956,28 +956,29 @@ contract FoMoXD is EFoMoXD {
      * @return dust left over
      */
     function updateMasks(
-        uint256 _rID,
-        uint256 _pID,
-        uint256 _gen,
+        uint256 _roundId,
+        uint256 _playerID,
+        uint256 _generalShare,
         uint256 _puffs,
         FXDdatasets.Teams _team
     ) private returns (uint256) {
         uint256 _expotions = 1000000000000000000;
         // calc profit per key & round mask based on this buy:  (dust goes to pot)
-        uint256 _profitPerPuff = (_gen * _expotions) / roundData_[_rID].puffs;
+        uint256 _profitPerPuff = (_generalShare * _expotions) /
+            roundData_[_roundId].puffs;
 
-        roundData_[_rID].mask += _profitPerPuff;
+        roundData_[_roundId].mask += _profitPerPuff;
 
         // calculate player earning from their own buy (only based on the puffs
         // they just bought).  & update player earnings mask
         uint256 _earning = (_profitPerPuff * _puffs) / _expotions;
-        playerRoundsData_[_pID][_rID].mask +=
-            ((roundData_[_rID].mask * _puffs) / _expotions) -
+        playerRoundsData_[_playerID][_roundId].mask +=
+            ((roundData_[_roundId].mask * _puffs) / _expotions) -
             (_earning);
 
         // calculate & return dust
-        return (_gen -
-            ((_profitPerPuff * (roundData_[_rID].puffs)) / (_expotions)));
+        return (_generalShare -
+            ((_profitPerPuff * (roundData_[_roundId].puffs)) / (_expotions)));
     }
 
     /**

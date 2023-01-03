@@ -360,7 +360,6 @@ contract PXD is ERC20, EPXD, IPXD, PXDEthCalc {
     ) internal antiEarlyWhale(_incomingEthereum) returns (uint256) {
         // data setup
         address _customerAddress = msg.sender;
-
         // 抽取 10% ETH 分紅
         uint256 _undividedDividends = _incomingEthereum / dividendFee_;
         // 分红三分之一 ETH 給推薦者

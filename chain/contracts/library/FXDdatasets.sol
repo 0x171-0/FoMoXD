@@ -20,12 +20,14 @@ library FXDdatasets {
         uint256 puffs; // puffs
         uint256 eth; // total eth in
         uint256 pot; // eth to pot (during round) / final amount paid to winner (after round ends)
-        uint256 mask; // global profit mask
+        // mask = global profit that can be withdraw
+        uint256 mask;
         uint256 nfts;
     }
     struct PlayerRounds {
         uint256 eth; // eth player has added to round (used for eth limiter)
         uint256 puffs; // puffs
+        // mask = profit user has withdrawed
         uint256 mask; // player profit mask, everytime withdraw will get profit from round mask and update player mask
     }
 

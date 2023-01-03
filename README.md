@@ -85,19 +85,20 @@ stateDiagram
     No_Time --> 🏁New_Round
 ```
 
-
+---
 ## Smart Contract Modules
 
 ```mermaid
     stateDiagram-v2
       FOMOXD --> PlayerBook
-      FOMOXD --> FOMOERC721
+      FOMOXD --> FoMoNFT
       FOMOXD --> Comminuty
       FOMOXD --> Devide
       Devide --> PXD
       FOMOXD --> Oracle
 
 ```
+The FoMoXD consists of the following smart contracts:
 
 1. FoMoXD/OtherFoMoXD: Interact with users and deal with gaming logic & data
 2. Player Book: A ledger of all games' leaderboards of recommended players.
@@ -107,6 +108,7 @@ stateDiagram
 6. Devide: Responsible for calculating and distributing profits to the holders of the tokens
 7. Oracle: Obtaining a random number from an Oracle. Once the random number has been generated, the game then uses it to determine whether or not a player is an airdrop winner.
 
+---
 # Profit-sharing System
 
 
@@ -119,6 +121,7 @@ stateDiagram
       Inner_Share  --> Team
       Inner_Share  --> Affiliate
       Inner_Share  --> FinalPotWinner
+      Inner_Share  --> AirdropPotWinner
     }
 
     New_Puff_Purchase --> External: External Profit sharing 
@@ -136,14 +139,16 @@ Every user has three parts of the division vault:
 
 ```mermaid
 flowchart LR
-    1[User Vault] --o 2[Winnings vault]
-    1 --o 3[General vault]
+    1[User Vault] --o 2[Winnings vault - pot]
+    1 --o 3[General vault - mask]
     1 --o 4[Affiliate vault]
     
 ```
 
-#### 1. Team Vault: Get team share
-Every user can choose a team when buying puffs, and it will determine how the profit share allocate.
+#### 1. General Vault: Get team share
+- Every user can choose a team when buying puffs, and it will determine how the profit share allocate.
+- Every round has a mask of general vault to record amount can be shared
+- Every user has a mask of general vault to record amount already withdrawed
 
 #### 2. Affiliate Vault: Get referral share
 
@@ -154,23 +159,105 @@ There are 3 ways to buy puffs:
 - Buy with affiliate address
   
 If the affiliate exists in the system then the affiliate will get the affiliate share.
+
 #### 3. Winning Vault: Final round winning share
 
-- The last user who bought puffs will win a share of the vault
-
+- Final round winner share
+- Airdrop winner share
 
 ### How FoMoXD share profits with every user?
 
-- Purchase puffs
+- Purchase Puff: 
+When user purchase puffs FoMoXD will update a global profit checker called "mask". It represent the amount of share to all the player of the sound.
 
 ```solidity
 // purchase puffs
+/**
+ * @dev updates masks for round and player when puffs are bought
+ * @return dust left over
+ */
+function updateMasks(
+    uint256 _roundId,
+    uint256 _playerID,
+    uint256 _generalShare,
+    uint256 _puffs,
+    FXDdatasets.Teams _team
+) private returns (uint256) {
+    uint256 _expotions = 1000000000000000000;
+    // calc profit per key & round mask based on this buy:  (dust goes to pot)
+    uint256 _profitPerPuff = (_generalShare * _expotions) /
+        roundData_[_roundId].puffs;
 
+    // 💡 update global tracker based on profit per share for each round
+    roundData_[_roundId].mask += _profitPerPuff;
+
+    // calculate player earning from their own buy (only based on the puffs
+    // they just bought).  & update player earnings mask
+    uint256 _earning = (_profitPerPuff * _puffs) / _expotions;
+    playerRoundsData_[_playerID][_roundId].mask +=
+        ((roundData_[_roundId].mask * _puffs) / _expotions) -
+        (_earning);
+
+    // calculate & return dust
+    return (_generalShare -
+        ((_profitPerPuff * (roundData_[_roundId].puffs)) / (_expotions)));
+}
 ```
 
-- Withdraw puffs
+- Withdraw: Every user also has a "mask" in their round data to record profit they have withdrawed.
+
+`earnAmountCanBeWithdraw = roundData_.mask * player.puffs / 1e18 - player.mask`
+
 ```solidity
-// withdraw puffs
+// withdraw
+/**
+ * @dev adds up unmasked earnings, & vault earnings, sets them all to 0
+ * @return earnings in wei format
+ */
+function withdrawEarnings(uint256 _pID) private returns (uint256) {
+    // 1️⃣ update generalShare vault
+    updateGeneralVault(_pID, player_[_pID].lastRound);
+
+    // from vaults
+    uint256 _earnings = player_[_pID].winningVault +
+        player_[_pID].generalVault +
+        player_[_pID].affiliateVault;
+    if (_earnings > 0) {
+        player_[_pID].winningVault = 0;
+        player_[_pID].generalVault = 0;
+        player_[_pID].affiliateVault = 0;
+    }
+
+    return (_earnings);
+}
+
+/**
+ * @dev moves any unmasked earnings to generalShare vault.  updates earnings mask
+ */
+function updateGeneralVault(uint256 _pID, uint256 _rIDlast) private {
+    // 2️⃣ calcuate mask earning
+    uint256 _generalEarnings = calcUnMaskedEarnings(_pID, _rIDlast);
+    if (_generalEarnings > 0) {
+        // put in generalShare vault
+        player_[_pID].generalVault += _generalEarnings;
+        // zero out their earnings by updating mask
+        playerRoundsData_[_pID][_rIDlast].mask += _generalEarnings;
+    }
+}
+
+/**
+ * @dev calculates unmasked earnings (just calculates, does not update mask)
+ * @return earnings in wei format
+ */
+function calcUnMaskedEarnings(
+    uint256 _pID,
+    uint256 _rIDlast
+) private view returns (uint256) {
+    // 3️⃣ earning = roundMaskProfit - userMaskProfit
+    return ((roundData_[_rIDlast].mask *
+        (playerRoundsData_[_pID][_rIDlast].puffs) / 1000000000000000000) -
+        playerRoundsData_[_pID][_rIDlast].mask);
+}
 
 ```
 
@@ -213,7 +300,6 @@ function purchaseTokens(
 - User remain share = profitPerShare * totalShareUserOwned - profitWithdrawed
 
 ```solidity
-
 function dividendsOf(
     address _customerAddress
 ) public view returns (uint256) {
@@ -232,8 +318,7 @@ function withdraw() public onlyStronghands {
   /// ...
   uint256 _dividends = myDividends(false); // get ref. bonus later in the code
 
-  // update dividend tracker
-  // 更新使用者已提取分潤
+  // update dividend tracker (amount user already withdraw)
   payoutsTo_[_customerAddress] += (int256)(_dividends * magnitude);
   /// ...
 }
