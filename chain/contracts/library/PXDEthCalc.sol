@@ -3,7 +3,7 @@ pragma solidity ^0.8.17;
 
 import "./Math.sol";
 
-contract PXDEthCalc is Math {
+library PXDEthCalc {
     /// @dev 最一開始的價格
     uint256 internal constant tokenPriceInitial_ = 0.0000001 ether;
 
@@ -22,7 +22,7 @@ contract PXDEthCalc is Math {
         uint256 _tokenPriceInitial = tokenPriceInitial_ * 1e18;
 
         uint256 _tokensReceived = ((// underflow attempts BTFO
-        sqrt(
+        Math.sqrt(
             _tokenPriceInitial ** 2 +
                 2 *
                 (tokenPriceIncremental_ * 1e18) *

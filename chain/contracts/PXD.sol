@@ -8,7 +8,7 @@ import "./interface/IPXD.sol";
 
 import "./library/PXDEthCalc.sol";
 
-contract PXD is ERC20, EPXD, IPXD, PXDEthCalc {
+contract PXD is ERC20, EPXD, IPXD {
     /* ------------------------------------------------------ */
     /*                      CONFIGURABLES                     */
     /* ------------------------------------------------------ */
@@ -209,7 +209,7 @@ contract PXD is ERC20, EPXD, IPXD, PXDEthCalc {
         require(_amountOfTokens <= _balances[_customerAddress]);
 
         uint256 _tokens = _amountOfTokens;
-        uint256 _ethereum = tokensToEthereum_(_tokens, tokenSupply_);
+        uint256 _ethereum = PXDEthCalc.tokensToEthereum_(_tokens, tokenSupply_);
 
         uint256 _dividends = (_ethereum / dividendFee_); // 抽取 10% 分潤
         uint256 _taxedEthereum = (_ethereum - _dividends);
@@ -265,7 +265,10 @@ contract PXD is ERC20, EPXD, IPXD, PXDEthCalc {
         // 扣除手續費後得到的 PXD 股權
         uint256 _taxedTokens = _amountOfTokens - _tokenFee;
 
-        uint256 _dividends = tokensToEthereum_(_tokenFee, tokenSupply_);
+        uint256 _dividends = PXDEthCalc.tokensToEthereum_(
+            _tokenFee,
+            tokenSupply_
+        );
 
         // burn the fee tokens
 
@@ -373,7 +376,7 @@ contract PXD is ERC20, EPXD, IPXD, PXDEthCalc {
         // 分紅完剩下的資金
         uint256 _taxedEthereum = _incomingEthereum - _undividedDividends;
         // 拿剩下的資金買幣
-        uint256 _amountOfTokens = ethereumToTokens_(
+        uint256 _amountOfTokens = PXDEthCalc.ethereumToTokens_(
             _taxedEthereum,
             tokenSupply_
         );
