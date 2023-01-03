@@ -207,8 +207,10 @@ contract PXD is ERC20, EPXD, IPXD, PXDEthCalc {
         address _customerAddress = msg.sender;
         // russian hackers BTFO
         require(_amountOfTokens <= _balances[_customerAddress]);
+
         uint256 _tokens = _amountOfTokens;
         uint256 _ethereum = tokensToEthereum_(_tokens, tokenSupply_);
+
         uint256 _dividends = (_ethereum / dividendFee_); // 抽取 10% 分潤
         uint256 _taxedEthereum = (_ethereum - _dividends);
 
@@ -220,6 +222,8 @@ contract PXD is ERC20, EPXD, IPXD, PXDEthCalc {
         int256 _updatedPayouts = (int256)(
             profitPerShare_ * _tokens + (_taxedEthereum * magnitude)
         );
+        // 減少使用者已提取分潤額，代表 user devide 增多，可以 withdraw 數量更多了
+        // userDevide = totalProfitPerShare_ - payoutsToUser
         payoutsTo_[_customerAddress] -= _updatedPayouts;
 
         // dividing by zero is a bad idea

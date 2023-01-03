@@ -10,7 +10,7 @@ import "./event/EDivies.sol";
  *  - 分潤給 PXD
  */
 contract Divies is EDivies {
-    IPXD PXDcontract_;
+    IPXD PXD_;
 
     uint256 public pusherTracker_ = 100;
     mapping(address => Pusher) public pushers_;
@@ -37,7 +37,7 @@ contract Divies is EDivies {
     /*                       constructor                      */
     /* ------------------------------------------------------ */
     constructor(IPXD P3Dcontract) {
-        PXDcontract_ = P3Dcontract;
+        PXD_ = P3Dcontract;
     }
 
     /* ------------------------------------------------------ */
@@ -85,32 +85,32 @@ contract Divies is EDivies {
             // setup mn payout for event
             if (
                 // 必需要有質押貸幣才可以當觸發者
-                PXDcontract_.balanceOf(_pusher) >=
-                PXDcontract_.stakingRequirement()
+                PXD_.balanceOf(_pusher) >= PXD_.stakingRequirement()
             ) _mnPayout = (_balance / 10) / 3;
 
             // setup _stop.  this will be used to tell the loop to stop
+            // 決定要分幾個 Percents
             uint256 _stop = (_balance * (100 - _percent)) / 100;
 
             // buy & sell
-            PXDcontract_.buy{value: _balance}(_pusher);
-            PXDcontract_.sell(PXDcontract_.balanceOf(address(this)));
+            PXD_.buy{value: _balance}(_pusher);
+            PXD_.sell(PXD_.balanceOf(address(this))); // 把全部 PXD Token 賣掉，PXD 抽取 10% 分潤
 
             // setup tracker.  this will be used to tell the loop to stop
-            uint256 _tracker = PXDcontract_.dividendsOf(address(this));
+            uint256 _tracker = PXD_.dividendsOf(address(this));
 
             // reinvest/sell loop
             while (_tracker >= _stop) {
                 // lets burn some tokens to distribute dividends to p3d holders
-                PXDcontract_.reinvest();
-                PXDcontract_.sell(PXDcontract_.balanceOf(address(this)));
+                PXD_.reinvest(); // 將持有的分潤再全部都拿去買 PXD Token，PXD 抽取 10% 分潤
+                PXD_.sell(PXD_.balanceOf(address(this))); // 把全部 PXD Token 賣掉獲取，PXD 抽取 10% 分潤
 
                 // update our tracker with estimates (yea. not perfect, but cheaper on gas)
                 _tracker = (_tracker * (81)) / 100;
             }
 
-            // withdraw 領取分紅
-            PXDcontract_.withdraw();
+            // withdraw 剩餘的 device
+            PXD_.withdraw();
         }
 
         // update pushers timestamp  (do outside of "if" for super saiyan level top kek)
