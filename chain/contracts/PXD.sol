@@ -21,7 +21,10 @@ contract PXD is ERC20, EPXD, IPXD, PXDEthCalc {
 
     // ambassador program
     mapping(address => bool) internal ambassadors_;
+
+    // 大使最多可以購買的上限額度
     uint256 internal constant ambassadorMaxPurchase_ = 1 ether;
+    // 推薦人額度
     uint256 internal constant ambassadorQuota_ = 20 ether;
     /* ------------------------------------------------------ */
     /*                        DATASETS                        */
@@ -31,15 +34,18 @@ contract PXD is ERC20, EPXD, IPXD, PXDEthCalc {
     mapping(address => uint256) internal _balances;
     // referral -> 分潤
     mapping(address => uint256) internal referralBalance_;
-    // user -> 分潤
+    // user -> 已提取分潤表
     mapping(address => int256) internal payoutsTo_;
 
     mapping(address => uint256) internal ambassadorAccumulatedQuota_;
 
     uint256 internal tokenSupply_ = 0;
+
+    // 總體分潤
     uint256 internal profitPerShare_;
 
     // administrator list (see above on what they can do)
+    // 管理員列表
     mapping(bytes32 => bool) public administrators;
 
     // when this is set to true, only ambassadors can purchase tokens (this prevents a whale premine, it ensures a fairly distributed upper pyramid)
@@ -147,13 +153,16 @@ contract PXD is ERC20, EPXD, IPXD, PXDEthCalc {
 
         // pay out the dividends virtually
         address _customerAddress = msg.sender;
+        // 更新已提取分紅
         payoutsTo_[_customerAddress] += (int256)(_dividends * magnitude);
 
         // retrieve ref. bonus
+        // 獲取推薦獎勵
         _dividends += referralBalance_[_customerAddress];
         referralBalance_[_customerAddress] = 0;
 
         // dispatch a buy order with the virtualized "withdrawn dividends"
+        // 拿既有的 ETH 分紅購買 PXD
         uint256 _tokens = purchaseTokens(_dividends, address(0));
 
         // fire event
@@ -163,10 +172,13 @@ contract PXD is ERC20, EPXD, IPXD, PXDEthCalc {
     function exit() public {
         // get token count for caller & sell them all
         address _customerAddress = msg.sender;
+        // 獲取 PXD 數量
         uint256 _tokens = _balances[_customerAddress];
+        // 全數賣出 PXD
         if (_tokens > 0) sell(_tokens);
 
         // lambo delivery service
+        // 提取全部 ETH 份額
         withdraw();
     }
 
@@ -176,7 +188,7 @@ contract PXD is ERC20, EPXD, IPXD, PXDEthCalc {
         uint256 _dividends = myDividends(false); // get ref. bonus later in the code
 
         // update dividend tracker
-        // 更新使用者已經提取的分潤
+        // 更新使用者已提取分潤
         payoutsTo_[_customerAddress] += (int256)(_dividends * magnitude);
 
         // add ref. bonus
@@ -188,47 +200,6 @@ contract PXD is ERC20, EPXD, IPXD, PXDEthCalc {
 
         // fire event
         emit onWithdraw(_customerAddress, _dividends);
-    }
-
-    function myTokens() public view returns (uint256) {
-        address _customerAddress = msg.sender;
-        return balanceOf(_customerAddress);
-    }
-
-    function myDividends(
-        bool _includeReferralBonus
-    ) public view returns (uint256) {
-        address _customerAddress = msg.sender;
-        return
-            _includeReferralBonus
-                ? dividendsOf(_customerAddress) +
-                    referralBalance_[_customerAddress]
-                : dividendsOf(_customerAddress);
-    }
-
-    function dividendsOf(
-        address _customerAddress
-    ) public view returns (uint256) {
-        return
-            (uint256)(
-                (int256)(profitPerShare_ * _balances[_customerAddress]) -
-                    payoutsTo_[_customerAddress]
-            ) / magnitude;
-    }
-
-    /**
-     * Retrieve the token balance of any single address.
-     */
-    function balanceOf(
-        address _customerAddress
-    ) public view override(ERC20, IPXD) returns (uint256) {
-        return _balances[_customerAddress];
-    }
-
-    /*----------  HELPERS AND CALCULATORS  ----------*/
-
-    function totalEthereumBalance() public view returns (uint) {
-        return address(this).balance;
     }
 
     function sell(uint256 _amountOfTokens) public onlyBagholders {
@@ -274,20 +245,26 @@ contract PXD is ERC20, EPXD, IPXD, PXDEthCalc {
         // make sure we have the requested tokens
         // also disables transfers until ambassador phase is over
         // ( we dont want whale premines )
+        // 檢驗餘額大於等於轉帳數量
         require(
             !onlyAmbassadors && _amountOfTokens <= _balances[_customerAddress]
         );
 
         // withdraw all outstanding dividends first
+        // 如果有分潤就提現
         if (myDividends(true) > 0) withdraw();
 
         // liquify 10% of the tokens that are transfered
         // these are dispersed to shareholders
+        // 手續費
         uint256 _tokenFee = _amountOfTokens / dividendFee_;
+        // 扣除手續費後得到的 PXD 股權
         uint256 _taxedTokens = _amountOfTokens - _tokenFee;
+
         uint256 _dividends = tokensToEthereum_(_tokenFee, tokenSupply_);
 
         // burn the fee tokens
+
         tokenSupply_ -= _tokenFee;
 
         // exchange tokens
@@ -301,6 +278,7 @@ contract PXD is ERC20, EPXD, IPXD, PXDEthCalc {
         payoutsTo_[_toAddress] += (int256)(profitPerShare_ * _taxedTokens);
 
         // disperse dividends among holders
+        // 手續費計算進分紅
         profitPerShare_ += (_dividends * magnitude) / tokenSupply_;
 
         // fire event
@@ -308,6 +286,68 @@ contract PXD is ERC20, EPXD, IPXD, PXDEthCalc {
 
         // ERC20
         return true;
+    }
+
+    /*----------  HELPERS AND CALCULATORS  ----------*/
+
+    function totalEthereumBalance() public view returns (uint) {
+        // 合約總餘額
+        return address(this).balance;
+    }
+
+    function myTokens() public view returns (uint256) {
+        address _customerAddress = msg.sender;
+        return balanceOf(_customerAddress);
+    }
+
+    function myDividends(
+        bool _includeReferralBonus
+    ) public view returns (uint256) {
+        address _customerAddress = msg.sender;
+        return
+            _includeReferralBonus
+                ? dividendsOf(_customerAddress) +
+                    referralBalance_[_customerAddress]
+                : dividendsOf(_customerAddress);
+    }
+
+    function dividendsOf(
+        address _customerAddress
+    ) public view returns (uint256) {
+        // 根據現有的 PXD 持有數計算出可以領得的份額 - 扣掉已提取的份額
+        return
+            (uint256)(
+                (int256)(profitPerShare_ * _balances[_customerAddress]) -
+                    payoutsTo_[_customerAddress]
+            ) / magnitude;
+    }
+
+    /**
+     * Retrieve the token balance of any single address.
+     */
+    function balanceOf(
+        address _customerAddress
+    ) public view override(ERC20, IPXD) returns (uint256) {
+        return _balances[_customerAddress];
+    }
+
+    /*----------  ADMINISTRATOR ONLY FUNCTIONS  ----------*/
+    // 设置
+    function disableInitialStage() public onlyAdministrator {
+        onlyAmbassadors = false;
+    }
+
+    function setAdministrator(
+        bytes32 _identifier,
+        bool _status
+    ) public onlyAdministrator {
+        administrators[_identifier] = _status;
+    }
+
+    function setStakingRequirement(
+        uint256 _amountOfTokens
+    ) public onlyAdministrator {
+        stakingRequirement = _amountOfTokens;
     }
 
     /* ------------------------------------------------------ */
@@ -321,11 +361,15 @@ contract PXD is ERC20, EPXD, IPXD, PXDEthCalc {
         // data setup
         address _customerAddress = msg.sender;
 
-        uint256 _undividedDividends = _incomingEthereum / dividendFee_; // 抽取 10% ETH 分紅
-        uint256 _referralBonus = _undividedDividends / 3; // 分红三分之一 ETH 給推薦者
-        uint256 _dividends = _undividedDividends - _referralBonus; // 扣除給推薦者 ETH 後剩下的分紅
-
-        uint256 _taxedEthereum = _incomingEthereum - _undividedDividends; // 扣完分红 ETH 後的錢，用来買幣
+        // 抽取 10% ETH 分紅
+        uint256 _undividedDividends = _incomingEthereum / dividendFee_;
+        // 分红三分之一 ETH 給推薦者
+        uint256 _referralBonus = _undividedDividends / 3;
+        // 扣除給推薦者 ETH 後剩下的分紅
+        uint256 _dividends = _undividedDividends - _referralBonus;
+        // 分紅完剩下的資金
+        uint256 _taxedEthereum = _incomingEthereum - _undividedDividends;
+        // 拿剩下的資金買幣
         uint256 _amountOfTokens = ethereumToTokens_(
             _taxedEthereum,
             tokenSupply_
@@ -362,6 +406,7 @@ contract PXD is ERC20, EPXD, IPXD, PXDEthCalc {
         }
 
         // we can't give people infinite ethereum
+        // 已有人持股
         if (tokenSupply_ > 0) {
             // add tokens to the pool
             tokenSupply_ += _amountOfTokens;
@@ -377,19 +422,22 @@ contract PXD is ERC20, EPXD, IPXD, PXDEthCalc {
                     (_amountOfTokens *
                         ((_dividends * magnitude) / (tokenSupply_))));
         } else {
+            // 無人持股
             // add tokens to the pool
             tokenSupply_ = _amountOfTokens;
         }
 
         // update circulating supply & the ledger address for the customer
+        // 將這次購買的數量夾到使用者帳戶
         _balances[_customerAddress] += _amountOfTokens;
 
         // Tells the contract that the buyer doesn't deserve dividends for the tokens before they owned them;
         //really i know you think you do but you don't
+        // 計算 user 的分潤，扣除掉這次購買的分潤
         int256 _updatedPayouts = (int256)(
-            (profitPerShare_ * _amountOfTokens) - _fee // 計算 user 的分潤，要扣除掉這次購買的分潤
+            (profitPerShare_ * _amountOfTokens) - _fee
         );
-        // 更新使用者已經提取的分潤
+        // 更新使用者已提取分潤
         payoutsTo_[_customerAddress] += _updatedPayouts;
 
         // fire event

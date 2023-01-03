@@ -60,7 +60,6 @@ npm run test
 ---
 ## Game Flow
 
-## FoMoXD
 
 ```mermaid
 stateDiagram
@@ -87,7 +86,7 @@ stateDiagram
 ```
 
 
-## FoMo Dapps Smart Contract Modules
+## Smart Contract Modules
 
 ```mermaid
     stateDiagram-v2
@@ -110,7 +109,25 @@ stateDiagram
 
 # Profit-sharing System
 
-### Internal
+```mermaid
+stateDiagram
+    direction LR
+    New_Puff_Purchase --> Internal: Internal Profit sharing 
+    state Internal{
+      Inner_Share  --> Team
+      Inner_Share  --> Affiliate
+      Inner_Share  --> FinalPotWinner
+    }
+
+    New_Puff_Purchase --> External: External Profit sharing 
+    state External{
+      Outer_Share  --> PXD_Owner
+      Outer_Share  --> Develpoer
+      Outer_Share  --> Community
+    }
+```
+
+### Internal Profit sharing
 
 
 Every user has three parts of division vault:
@@ -127,7 +144,7 @@ flowchart LR
 ```
 
 
-### External
+### External Profit sharing
 
 There are three groups of users can gain external share
 
@@ -136,6 +153,60 @@ There are three groups of users can gain external share
 3. DEV Team: Developer team
 
 # PoWH3D (P3D) token profit sharing 
+
+``` mermaid
+flowchart TD
+  1(New PXD Purchase)--> 2(Get _dividends: 10% incoming ETH) 
+  2 --> 4(1/3 as Referral bonus)
+  2 --> 5(2/3 as PXD Owner Bonus)
+
+```
+
+###  How PXD share bonus to every user?
+
+- Record profit per share after each purcahse
+
+```solidity
+function purchaseTokens(
+    uint256 _incomingEthereum,
+    address _referredBy // 推薦人
+) internal antiEarlyWhale(_incomingEthereum) returns (uint256) {
+  /// ...
+  // take the amount of dividends gained through this transaction, and allocates them evenly to each shareholder
+  profitPerShare_ += ((_dividends * magnitude) / (tokenSupply_));
+  /// ...
+}
+```
+
+- User remain share = profitPerShare * totalShareUserOwned - profitWithdrawed
+
+```solidity
+
+function dividendsOf(
+    address _customerAddress
+) public view returns (uint256) {
+    return
+        (uint256)(
+            (int256)(profitPerShare_ * _balances[_customerAddress]) -
+                payoutsTo_[_customerAddress]
+        ) / magnitude;
+}
+```
+
+- Record profit user withdrawed after each withdraw
+
+```solidity
+function withdraw() public onlyStronghands {
+  /// ...
+  uint256 _dividends = myDividends(false); // get ref. bonus later in the code
+
+  // update dividend tracker
+  // 更新使用者已提取分潤
+  payoutsTo_[_customerAddress] += (int256)(_dividends * magnitude);
+  /// ...
+}
+```
+
 
 ---
 
