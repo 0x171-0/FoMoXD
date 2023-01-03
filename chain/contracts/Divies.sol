@@ -7,7 +7,7 @@ import "./event/EDivies.sol";
 /*
  * - Divies -
  * -> What do this contract do?
- *  - 分潤給
+ *  - 分潤給 PXD
  */
 contract Divies is EDivies {
     IPXD PXDcontract_;
@@ -23,6 +23,7 @@ contract Divies is EDivies {
     /*                        MODIFIER                        */
     /* ------------------------------------------------------ */
     modifier onlyHuman() {
+        /// @dev Can't prevent attack in constructor(無法防止合約在 constructor 中攻擊)
         address sender = msg.sender;
         uint256 size;
         assembly {
@@ -70,7 +71,6 @@ contract Divies is EDivies {
         address _pusher = msg.sender; // 觸發分潤的人
         uint256 _balance = address(this).balance; // 目前待分潤的餘額
         uint256 _mnPayout;
-        // uint256 _compressedData;
 
         // limit pushers greed (use "if" instead of require for level 42 top kek)
         /// @dev 同一個使用者，在一個小時內、100 個觸發者內只能觸發一次

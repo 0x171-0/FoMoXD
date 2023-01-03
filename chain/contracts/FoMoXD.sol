@@ -98,6 +98,7 @@ contract FoMoXD is EFoMoXD {
     }
 
     modifier onlyHuman() {
+        /// @dev Can't prevent attack in constructor(無法防止合約在 constructor 中攻擊)
         address sender = msg.sender;
         uint256 size;
         assembly {

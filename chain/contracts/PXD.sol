@@ -4,20 +4,15 @@ pragma solidity ^0.8.17;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "./event/EPXD.sol";
 
-import "./library/Math.sol";
 import "./interface/IPXD.sol";
 
-contract PXD is ERC20, EPXD, Math, IPXD {
+import "./library/PXDEthCalc.sol";
+
+contract PXD is ERC20, EPXD, IPXD, PXDEthCalc {
     /* ------------------------------------------------------ */
     /*                      CONFIGURABLES                     */
     /* ------------------------------------------------------ */
     uint8 internal constant dividendFee_ = 10; // 買賣幣都會抽取 10% 手續費
-
-    /// @dev 最一開始的價格
-    uint256 internal constant tokenPriceInitial_ = 0.0000001 ether;
-
-    ///
-    uint256 internal constant tokenPriceIncremental_ = 0.00000001 ether;
 
     uint256 internal constant magnitude = 2 ** 64;
 
@@ -32,10 +27,15 @@ contract PXD is ERC20, EPXD, Math, IPXD {
     /*                        DATASETS                        */
     /* ------------------------------------------------------ */
     // amount of shares for each address (scaled number)
-    mapping(address => uint256) internal tokenBalanceLedger_;
+    // user -> PXD balance
+    mapping(address => uint256) internal _balances;
+    // referral -> 分潤
     mapping(address => uint256) internal referralBalance_;
+    // user -> 分潤
     mapping(address => int256) internal payoutsTo_;
+
     mapping(address => uint256) internal ambassadorAccumulatedQuota_;
+
     uint256 internal tokenSupply_ = 0;
     uint256 internal profitPerShare_;
 
@@ -113,12 +113,9 @@ contract PXD is ERC20, EPXD, Math, IPXD {
     /* ------------------------------------------------------ */
 
     constructor(
-        uint256 initialSupply,
         string memory _name,
         string memory _symbol
-    ) ERC20(_name, _symbol) {
-        _mint(msg.sender, initialSupply);
-    }
+    ) ERC20(_name, _symbol) {}
 
     /* ------------------------------------------------------ */
     /*                   external functions
@@ -166,7 +163,7 @@ contract PXD is ERC20, EPXD, Math, IPXD {
     function exit() public {
         // get token count for caller & sell them all
         address _customerAddress = msg.sender;
-        uint256 _tokens = tokenBalanceLedger_[_customerAddress];
+        uint256 _tokens = _balances[_customerAddress];
         if (_tokens > 0) sell(_tokens);
 
         // lambo delivery service
@@ -179,6 +176,7 @@ contract PXD is ERC20, EPXD, Math, IPXD {
         uint256 _dividends = myDividends(false); // get ref. bonus later in the code
 
         // update dividend tracker
+        // 更新使用者已經提取的分潤
         payoutsTo_[_customerAddress] += (int256)(_dividends * magnitude);
 
         // add ref. bonus
@@ -213,9 +211,8 @@ contract PXD is ERC20, EPXD, Math, IPXD {
     ) public view returns (uint256) {
         return
             (uint256)(
-                (int256)(
-                    profitPerShare_ * tokenBalanceLedger_[_customerAddress]
-                ) - payoutsTo_[_customerAddress]
+                (int256)(profitPerShare_ * _balances[_customerAddress]) -
+                    payoutsTo_[_customerAddress]
             ) / magnitude;
     }
 
@@ -225,7 +222,7 @@ contract PXD is ERC20, EPXD, Math, IPXD {
     function balanceOf(
         address _customerAddress
     ) public view override(ERC20, IPXD) returns (uint256) {
-        return tokenBalanceLedger_[_customerAddress];
+        return _balances[_customerAddress];
     }
 
     /*----------  HELPERS AND CALCULATORS  ----------*/
@@ -238,15 +235,15 @@ contract PXD is ERC20, EPXD, Math, IPXD {
         // setup data
         address _customerAddress = msg.sender;
         // russian hackers BTFO
-        require(_amountOfTokens <= tokenBalanceLedger_[_customerAddress]);
+        require(_amountOfTokens <= _balances[_customerAddress]);
         uint256 _tokens = _amountOfTokens;
-        uint256 _ethereum = tokensToEthereum_(_tokens);
-        uint256 _dividends = (_ethereum / dividendFee_); // 抽取 10% 手續費
+        uint256 _ethereum = tokensToEthereum_(_tokens, tokenSupply_);
+        uint256 _dividends = (_ethereum / dividendFee_); // 抽取 10% 分潤
         uint256 _taxedEthereum = (_ethereum - _dividends);
 
         // burn the sold tokens
         tokenSupply_ = tokenSupply_ - _tokens;
-        tokenBalanceLedger_[_customerAddress] -= _tokens;
+        _balances[_customerAddress] -= _tokens;
 
         // update dividends tracker
         int256 _updatedPayouts = (int256)(
@@ -257,6 +254,7 @@ contract PXD is ERC20, EPXD, Math, IPXD {
         // dividing by zero is a bad idea
         if (tokenSupply_ > 0) {
             // update the amount of dividends per token
+            // 把分潤分給所有持有人
             profitPerShare_ =
                 profitPerShare_ +
                 ((_dividends * magnitude) / tokenSupply_);
@@ -277,8 +275,7 @@ contract PXD is ERC20, EPXD, Math, IPXD {
         // also disables transfers until ambassador phase is over
         // ( we dont want whale premines )
         require(
-            !onlyAmbassadors &&
-                _amountOfTokens <= tokenBalanceLedger_[_customerAddress]
+            !onlyAmbassadors && _amountOfTokens <= _balances[_customerAddress]
         );
 
         // withdraw all outstanding dividends first
@@ -288,14 +285,14 @@ contract PXD is ERC20, EPXD, Math, IPXD {
         // these are dispersed to shareholders
         uint256 _tokenFee = _amountOfTokens / dividendFee_;
         uint256 _taxedTokens = _amountOfTokens - _tokenFee;
-        uint256 _dividends = tokensToEthereum_(_tokenFee);
+        uint256 _dividends = tokensToEthereum_(_tokenFee, tokenSupply_);
 
         // burn the fee tokens
         tokenSupply_ -= _tokenFee;
 
         // exchange tokens
-        tokenBalanceLedger_[_customerAddress] -= _amountOfTokens;
-        tokenBalanceLedger_[_toAddress] += _taxedTokens;
+        _balances[_customerAddress] -= _amountOfTokens;
+        _balances[_toAddress] += _taxedTokens;
 
         // update dividend trackers
         payoutsTo_[_customerAddress] -= (int256)(
@@ -307,7 +304,7 @@ contract PXD is ERC20, EPXD, Math, IPXD {
         profitPerShare_ += (_dividends * magnitude) / tokenSupply_;
 
         // fire event
-        Transfer(_customerAddress, _toAddress, _taxedTokens);
+        emit Transfer(_customerAddress, _toAddress, _taxedTokens);
 
         // ERC20
         return true;
@@ -319,16 +316,22 @@ contract PXD is ERC20, EPXD, Math, IPXD {
 
     function purchaseTokens(
         uint256 _incomingEthereum,
-        address _referredBy
+        address _referredBy // 推薦人
     ) internal antiEarlyWhale(_incomingEthereum) returns (uint256) {
         // data setup
         address _customerAddress = msg.sender;
-        uint256 _undividedDividends = _incomingEthereum / dividendFee_; // 抽取 10% 手續費
-        uint256 _referralBonus = _undividedDividends / 3; // 分红三分之一給推薦者
-        uint256 _dividends = _undividedDividends - _referralBonus; // 真正属於分红的錢
-        uint256 _taxedEthereum = _incomingEthereum - _undividedDividends; // 扣完分红後的钱，用来買幣
-        uint256 _amountOfTokens = ethereumToTokens_(_taxedEthereum);
-        uint256 _fee = _dividends * magnitude;
+
+        uint256 _undividedDividends = _incomingEthereum / dividendFee_; // 抽取 10% ETH 分紅
+        uint256 _referralBonus = _undividedDividends / 3; // 分红三分之一 ETH 給推薦者
+        uint256 _dividends = _undividedDividends - _referralBonus; // 扣除給推薦者 ETH 後剩下的分紅
+
+        uint256 _taxedEthereum = _incomingEthereum - _undividedDividends; // 扣完分红 ETH 後的錢，用来買幣
+        uint256 _amountOfTokens = ethereumToTokens_(
+            _taxedEthereum,
+            tokenSupply_
+        );
+
+        uint256 _fee = _dividends * magnitude; // 總分潤
 
         // no point in continuing execution if OP is a poorfag russian hacker
         // prevents overflow in the case that the pyramid somehow magically starts being used by everyone in the world
@@ -338,15 +341,16 @@ contract PXD is ERC20, EPXD, Math, IPXD {
             _amountOfTokens > 0 && _amountOfTokens + tokenSupply_ > tokenSupply_
         );
 
+        // 如果有推薦者，則推薦獎金歸推薦者；如果沒有推薦者，則推薦獎金歸給使用者自己
         // is the user referred by a masternode?
         if (
             // is this a referred purchase?
             _referredBy != 0x0000000000000000000000000000000000000000 &&
-            // no cheating!
+            // no cheating! 推薦人不能是自己
             _referredBy != _customerAddress &&
             // does the referrer have at least X whole tokens?
             // i.e is the referrer a godly chad masternode
-            tokenBalanceLedger_[_referredBy] >= stakingRequirement
+            _balances[_referredBy] >= stakingRequirement
         ) {
             // wealth redistribution
             referralBalance_[_referredBy] += _referralBonus;
@@ -363,6 +367,7 @@ contract PXD is ERC20, EPXD, Math, IPXD {
             tokenSupply_ += _amountOfTokens;
 
             // take the amount of dividends gained through this transaction, and allocates them evenly to each shareholder
+            // 分潤給 PXD 持有者
             profitPerShare_ += ((_dividends * magnitude) / (tokenSupply_));
 
             // calculate the amount of tokens the customer receives over his purchase
@@ -377,13 +382,14 @@ contract PXD is ERC20, EPXD, Math, IPXD {
         }
 
         // update circulating supply & the ledger address for the customer
-        tokenBalanceLedger_[_customerAddress] += _amountOfTokens;
+        _balances[_customerAddress] += _amountOfTokens;
 
         // Tells the contract that the buyer doesn't deserve dividends for the tokens before they owned them;
         //really i know you think you do but you don't
         int256 _updatedPayouts = (int256)(
-            (profitPerShare_ * _amountOfTokens) - _fee
+            (profitPerShare_ * _amountOfTokens) - _fee // 計算 user 的分潤，要扣除掉這次購買的分潤
         );
+        // 更新使用者已經提取的分潤
         payoutsTo_[_customerAddress] += _updatedPayouts;
 
         // fire event
@@ -395,71 +401,5 @@ contract PXD is ERC20, EPXD, Math, IPXD {
         );
 
         return _amountOfTokens;
-    }
-
-    /**
-     * Calculate Token price based on an amount of incoming ethereum
-     * It's an algorithm, hopefully we gave you the whitepaper with it in scientific notation;
-     * Some conversions occurred to prevent decimal errors or underflows / overflows in solidity code.
-     */
-    function ethereumToTokens_(
-        uint256 _ethereum
-    ) internal view returns (uint256) {
-        uint256 _tokenPriceInitial = tokenPriceInitial_ * 1e18;
-        // uint256 _tokensReceived = ((
-        //     // underflow attempts BTFO
-        //     SafeMath.sub(
-        //         (
-        //             sqrt(
-        //                 (_tokenPriceInitial ** 2) +
-        //                     (2 *
-        //                         (tokenPriceIncremental_ * 1e18) *
-        //                         (_ethereum * 1e18)) +
-        //                     (((tokenPriceIncremental_) ** 2) *
-        //                         (tokenSupply_ ** 2)) +
-        //                     (2 *
-        //                         (tokenPriceIncremental_) *
-        //                         _tokenPriceInitial *
-        //                         tokenSupply_)
-        //             )
-        //         ),
-        //         _tokenPriceInitial
-        //     )
-        // ) / (tokenPriceIncremental_)) - (tokenSupply_);
-
-        uint256 _tokensReceived = ((// underflow attempts BTFO
-        sqrt(
-            _tokenPriceInitial ** 2 +
-                2 *
-                (tokenPriceIncremental_ * 1e18) *
-                (_ethereum * 1e18) +
-                tokenPriceIncremental_ ** 2 *
-                tokenSupply_ ** 2 +
-                2 *
-                tokenPriceIncremental_ *
-                _tokenPriceInitial *
-                tokenSupply_
-        ) - _tokenPriceInitial) / tokenPriceIncremental_) - tokenSupply_;
-
-        return _tokensReceived;
-    }
-
-    /**
-     * Calculate token sell value.
-     * It's an algorithm, hopefully we gave you the whitepaper with it in scientific notation;
-     * Some conversions occurred to prevent decimal errors or underflows / overflows in solidity code.
-     */
-    function tokensToEthereum_(
-        uint256 _tokens
-    ) internal view returns (uint256) {
-        uint256 tokens_ = (_tokens + 1e18);
-        uint256 _tokenSupply = (tokenSupply_ + 1e18);
-        uint256 _etherReceived = (// underflow attempts BTFO
-        (((tokenPriceInitial_ +
-            (tokenPriceIncremental_ * (_tokenSupply / 1e18))) -
-            tokenPriceIncremental_) * (tokens_ - 1e18)) -
-            (tokenPriceIncremental_ * ((tokens_ ** 2 - tokens_) / 1e18)) /
-            2) / 1e18;
-        return _etherReceived;
     }
 }
