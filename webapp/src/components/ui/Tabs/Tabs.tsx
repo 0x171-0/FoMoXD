@@ -215,7 +215,7 @@ const Tabs = (props: any) => {
               />
               <BaseInput
                 label="round-gans"
-                text="Total Gains"
+                text="Total Gains" // mask
                 value={Web3.utils.fromWei(roundData.mask.toString(), 'ether')}
                 type="string"
               />
@@ -227,7 +227,7 @@ const Tabs = (props: any) => {
               />
               <BaseInput
                 label="your-gans"
-                text="Your Gains"
+                text="Your Gains" // mask
                 value={Web3.utils.fromWei(playerData.mask.toString(), 'ether')}
                 type="string"
               />

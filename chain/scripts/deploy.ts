@@ -6,7 +6,7 @@ async function main() {
   console.log("Account balance:", (await deployer.getBalance()).toString());
   /* ------------------------ ERC20 ----------------------- */
   const PXD = await ethers.getContractFactory("PXD");
-  const pxd = await PXD.deploy(10 ** 6, "PowHXD", "FXD");
+  const pxd = await PXD.deploy("PowHXD", "FXD");
   console.log(`[PXD] Deployed to ${pxd.address}`);
   /* ----------------------- ERC721 ----------------------- */
   const FoMoERC721 = await ethers.getContractFactory("FoMoERC721");
@@ -34,14 +34,16 @@ async function main() {
   /* ---------------------- Timelock ---------------------- */
   const Timelock = await ethers.getContractFactory("Timelock");
   const timelock = await Timelock.deploy(deployer.address, 60);
+  console.log(`[Timelock] Deployed to ${timelock.address}`);
   /* ---------------------- Community --------------------- */
   const Community = await ethers.getContractFactory("Community");
   const community = await Community.deploy(
     [deployer.address, dev1.address, dev2.address],
     timelock.address,
-    60,
+    20,
     60
   );
+  console.log(`[Community] Deployed to ${community.address}`);
   /* --------------------- PlayerBook --------------------- */
   const PlayerBook = await ethers.getContractFactory("PlayerBook");
   const playerBook = await PlayerBook.deploy(community.address);
