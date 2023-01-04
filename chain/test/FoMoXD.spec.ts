@@ -14,7 +14,7 @@ describe("FoMoXD", function () {
       await ethers.getSigners();
 
     const PXD = await ethers.getContractFactory("PXD");
-    const pxd = await PXD.deploy(10 ** 6, "PowHXD", "FXD");
+    const pxd = await PXD.deploy("PowHXD", "FXD");
 
     const FOMOERC721_MYSTERY_BOX_IMAGE_URI =
       "https://ipfs.io/ipfs/egqoirncqioryqeogejxuxthoqh4q/";
@@ -29,10 +29,15 @@ describe("FoMoXD", function () {
     const Divies = await ethers.getContractFactory("Divies");
     const divies = await Divies.deploy(pxd.address);
 
+    const Timelock = await ethers.getContractFactory("Timelock");
+    const timelock = await Timelock.deploy(owner.address, 60);
+
     const Community = await ethers.getContractFactory("Community");
     const community = await Community.deploy(
       [owner.address, dev1.address, dev2.address],
-      2
+      timelock.address,
+      20, // About 5 minute
+      60
     );
 
     const PlayerBook = await ethers.getContractFactory("PlayerBook");

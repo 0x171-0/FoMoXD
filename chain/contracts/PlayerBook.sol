@@ -15,7 +15,7 @@ contract PlayerBook is EPlayerBook {
     uint256 public registrationFee_ = 1 gwei;
     uint256 public pID_; // total number of players
     uint256 public gID_; // total number of games
-
+    address owner_;
     // price to register a name
     struct Player {
         address addr;
@@ -26,12 +26,19 @@ contract PlayerBook is EPlayerBook {
 
     mapping(address => uint256) public gameIDs_; // lokup a games ID
     mapping(address => bytes32) public gameNames_; // lookup a games name
-    mapping(uint256 => Player) public player_; // (pID => data) player data
-    mapping(address => uint256) public playerIDxAddr_; // (addr => pID) returns player id by address
-    mapping(bytes32 => uint256) public pIDxName_; // (name => pID) returns player id by name
-    mapping(uint256 => mapping(bytes32 => bool)) public plyrNames_; // (pID => name => bool) list of names a player owns.  (used so you can change your display name amoungst any name you own)
-    mapping(uint256 => mapping(uint256 => bytes32)) public plyrNameList_; // (pID => nameNum => name) list of names a player owns
-    mapping(uint256 => IPlayerBookReceiver) public games_; // mapping of our game interfaces for sending your account info to games
+
+    // (pID => data) player data
+    mapping(uint256 => Player) public player_;
+    // (addr => pID) returns player id by address
+    mapping(address => uint256) public playerIDxAddr_;
+    // (name => pID) returns player id by name
+    mapping(bytes32 => uint256) public pIDxName_;
+    // (pID => name => bool) list of names a player owns.  (used so you can change your display name amoungst any name you own)
+    mapping(uint256 => mapping(bytes32 => bool)) public plyrNames_;
+    // (pID => nameNum => name) list of names a player owns
+    mapping(uint256 => mapping(uint256 => bytes32)) public plyrNameList_;
+    // mapping of our game interfaces for sending your account info to games
+    mapping(uint256 => IPlayerBookReceiver) public games_;
 
     /* ------------------------------------------------------ */
     /*                        MODIFIER                        */
@@ -49,6 +56,14 @@ contract PlayerBook is EPlayerBook {
         _;
     }
 
+    modifier onlyDevsMultiSig() {
+        require(
+            msg.sender == address(Community_) || msg.sender == owner_,
+            "pls propose by the community"
+        );
+        _;
+    }
+
     /* ------------------------------------------------------ */
     /*                        FUNCTIONS
     /* ------------------------------------------------------ */
@@ -56,6 +71,7 @@ contract PlayerBook is EPlayerBook {
     /*                       constructor                      */
     /* ------------------------------------------------------ */
     constructor(ICommunity _community) {
+        owner_ = msg.sender;
         Community_ = _community;
 
         player_[1].addr = msg.sender;
@@ -89,15 +105,12 @@ contract PlayerBook is EPlayerBook {
     function addGame(
         address _gameAddress,
         string calldata _gameNameStr
-    ) external onlyDevs {
+    ) external onlyDevsMultiSig {
         require(
             gameIDs_[_gameAddress] == 0,
             "derp, that games already been registered"
         );
 
-        // TODO: 有時間再加入多簽的設計
-        // if (multiSigDev("addGame") == true) {
-        // deleteProposal("addGame");
         gID_++;
         bytes32 _name = _gameNameStr.nameFilter();
         gameIDs_[_gameAddress] = gID_;
@@ -105,8 +118,6 @@ contract PlayerBook is EPlayerBook {
         games_[gID_] = IPlayerBookReceiver(_gameAddress);
 
         games_[gID_].receivePlayerInfo(1, player_[1].addr, player_[1].name, 0);
-
-        // }
     }
 
     function registerNameXIDFromDapp(
@@ -142,6 +153,13 @@ contract PlayerBook is EPlayerBook {
         registerNameCore(_pID, _addr, _affID, _name, _isNewPlayer, _all);
 
         return (_isNewPlayer, _affID);
+    }
+
+    /* ------------------------------------------------------ */
+    /*                     public function                    */
+    /* ------------------------------------------------------ */
+    function setRegistrationFee(uint256 _fee) public onlyDevsMultiSig {
+        registrationFee_ = _fee;
     }
 
     /* ------------------------------------------------------ */

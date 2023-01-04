@@ -31,11 +31,16 @@ async function main() {
   );
 
   console.log(`[FoMoERC721] Deployed to ${foMoERC721.address}`);
+  /* ---------------------- Timelock ---------------------- */
+  const Timelock = await ethers.getContractFactory("Timelock");
+  const timelock = await Timelock.deploy(deployer.address, 60);
   /* ---------------------- Community --------------------- */
   const Community = await ethers.getContractFactory("Community");
   const community = await Community.deploy(
     [deployer.address, dev1.address, dev2.address],
-    2
+    timelock.address,
+    60,
+    60
   );
   /* --------------------- PlayerBook --------------------- */
   const PlayerBook = await ethers.getContractFactory("PlayerBook");

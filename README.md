@@ -327,21 +327,12 @@ function withdraw() public onlyStronghands {
 
 ---
 
-# Todo
-
-## Chain
-
-[ ] Decentralize Governance system
-
----
-
-## Client
-
-[ ] Profit-sharing Token Page
 
 # Credits
 - [Style Guide](https://docs.soliditylang.org/en/v0.8.17/common-patterns.html)
 - [FoMo3D](https://github.com/reedhong/fomo3d_clone)
+- [Compound Governance](https://github.com/compound-finance/compound-protocol/tree/master/contracts)
+- [BeansTalk Decimal](<https://github.com/BeanstalkFarms/Beanstalk/blob/master/protocol/contracts/libraries/Decimal.sol/>
 
 ### NFT Images
 - <https://giventofly.github.io/pixelit/>
@@ -355,4 +346,3 @@ function withdraw() public onlyStronghands {
   - [Coin](https://sc.chinaz.com/yinxiao/220716414170.htm)
   - [on/off sound comes from](https://taira-komori.jpn.org/openclose01tw.html)
 
-### References

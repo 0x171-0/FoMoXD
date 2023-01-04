@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "./Math.sol";
-
 library PXDEthCalc {
     /// @dev 最一開始的價格
     uint256 internal constant tokenPriceInitial_ = 0.0000001 ether;
@@ -22,7 +20,7 @@ library PXDEthCalc {
         uint256 _tokenPriceInitial = tokenPriceInitial_ * 1e18;
 
         uint256 _tokensReceived = ((// underflow attempts BTFO
-        Math.sqrt(
+        sqrt(
             _tokenPriceInitial ** 2 +
                 2 *
                 (tokenPriceIncremental_ * 1e18) *
@@ -56,5 +54,14 @@ library PXDEthCalc {
             (tokenPriceIncremental_ * ((tokens_ ** 2 - tokens_) / 1e18)) /
             2) / 1e18;
         return _etherReceived;
+    }
+
+    function sqrt(uint256 x) public pure returns (uint256 y) {
+        uint256 z = (((x + 1)) / 2);
+        y = x;
+        while (z < y) {
+            y = z;
+            z = ((((x / z) + z)) / 2);
+        }
     }
 }
