@@ -92,10 +92,12 @@ stateDiagram
     stateDiagram-v2
       FOMOXD --> PlayerBook
       FOMOXD --> FoMoNFT
-      FOMOXD --> Comminuty
+      FOMOXD --> Comminuty 
+      Comminuty --> Governance
       FOMOXD --> Devide
       Devide --> PXD
-      FOMOXD --> Oracle
+      FOMOXD --> RandomNumber
+      RandomNumber --> Oracle
 
 ```
 The FoMoXD consists of the following smart contracts:
@@ -147,8 +149,7 @@ flowchart LR
 
 #### 1. General Vault: Get team share
 - Every user can choose a team when buying puffs, and it will determine how the profit share allocate.
-- Every round has a mask of general vault to record amount can be shared
-- Every user has a mask of general vault to record amount already withdrawed
+- When final round end, user will get team share
 
 #### 2. Affiliate Vault: Get referral share
 
@@ -167,8 +168,10 @@ If the affiliate exists in the system then the affiliate will get the affiliate 
 
 ### How FoMoXD share profits with every user?
 
+`(roundProfit / roundPuffs) * userPuffs`
+
 - Purchase Puff: 
-When user purchase puffs FoMoXD will update a global profit checker called "mask". It represent the amount of share to all the player of the sound.
+When user purchase puffs FoMoXD will update a global round profit checker called "mask". It represent the amount of share to all the player of the sound.
 
 ```solidity
 // purchase puffs
@@ -282,6 +285,8 @@ flowchart TD
 ```
 
 ###  How PXD share profits with users?
+
+`(devideProfits / tokenSupply) * userTokenBalance`
 
 - Record profit per share after each purcahse
 

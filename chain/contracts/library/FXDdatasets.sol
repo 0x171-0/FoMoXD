@@ -35,10 +35,10 @@ library FXDdatasets {
         address addr; // player address
         bytes32 name; // player name
         uint256 lastRound; // last round played
-        uint256 lastAffiliateId; // last affiliate id used // TODO: 每一次買 Key 的推薦人都可以不一樣？
+        uint256 lastAffiliateId; // last affiliate id used
         /* ----------- $$$ of all rounds------------------------ */
-        uint256 winningVault; // winnings vault
-        uint256 generalVault; // general vault
+        uint256 winningVault; // winnings vault // 回合結束分到的 final pot 獎勵
+        uint256 generalVault; // general vault // 回合結束分到的 Team 獎勵
         uint256 affiliateVault; // affiliate vault
     }
 
